@@ -4,7 +4,7 @@ Cette track vise à implémenter le Produit Minimum Viable (MVP) d'AgregLLM, com
 
 ## Phase 1 : Extension de Navigateur pour ChatGPT
 
-- [ ] Task: Initialiser le projet d'extension (Manifest V3)
+- [x] Task: Initialiser le projet d'extension (Manifest V3) [910f93e]
     - [ ] Écrire les tests pour la structure de base du Manifest V3.
     - [ ] Implémenter la structure de base du Manifest V3 (manifest.json, background.js).
 - [ ] Task: Détection et capture des URL de conversations ChatGPT
