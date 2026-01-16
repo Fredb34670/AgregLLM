@@ -1,0 +1,6 @@
+/* popup.css - Styles pour le popup de l'extension AgregLLM */
+body {
+  font-family: sans-serif;
+  width: 200px;
+  padding: 10px;
+}
