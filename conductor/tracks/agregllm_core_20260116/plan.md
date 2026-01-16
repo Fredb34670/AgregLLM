@@ -15,7 +15,7 @@ Cette track vise à implémenter le Produit Minimum Viable (MVP) d'AgregLLM, com
     - [ ] Implémenter l'injection du bouton de confirmation sur les pages ChatGPT.
     - [ ] Écrire les tests pour la capture des données de la conversation (titre, date, etc.).
     - [ ] Implémenter la logique de capture des données au clic sur le bouton.
-- [ ] Task: Communication de l'extension vers l'application web
+- [x] Task: Communication de l'extension vers l'application web [5399d6e]
     - [ ] Écrire les tests pour l'envoi sécurisé des données capturées à l'application web.
     - [ ] Implémenter le mécanisme de communication (e.g., `chrome.runtime.sendMessage`).
 - [ ] Task: Conductor - User Manual Verification 'Extension de Navigateur pour ChatGPT' (Protocol in workflow.md)
