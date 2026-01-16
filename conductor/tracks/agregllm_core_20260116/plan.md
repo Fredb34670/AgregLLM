@@ -7,7 +7,7 @@ Cette track vise à implémenter le Produit Minimum Viable (MVP) d'AgregLLM, com
 - [x] Task: Initialiser le projet d'extension (Manifest V3) [910f93e]
     - [ ] Écrire les tests pour la structure de base du Manifest V3.
     - [ ] Implémenter la structure de base du Manifest V3 (manifest.json, background.js).
-- [ ] Task: Détection et capture des URL de conversations ChatGPT
+- [x] Task: Détection et capture des URL de conversations ChatGPT [695a0ce]
     - [ ] Écrire les tests pour la détection d'URL de conversations ChatGPT.
     - [ ] Implémenter le script de détection d'URL.
 - [ ] Task: Interface utilisateur de confirmation et de capture
