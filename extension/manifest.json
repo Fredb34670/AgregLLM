@@ -14,6 +14,12 @@
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://chat.openai.com/*"],
+      "js": ["scripts/url_detector.js", "scripts/content.js"]
+    }
+  ],
   "action": {
     "default_title": "AgregLLM",
     "default_popup": "popup.html"
