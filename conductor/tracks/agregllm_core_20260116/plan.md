@@ -10,7 +10,7 @@ Cette track vise à implémenter le Produit Minimum Viable (MVP) d'AgregLLM, com
 - [x] Task: Détection et capture des URL de conversations ChatGPT [695a0ce]
     - [ ] Écrire les tests pour la détection d'URL de conversations ChatGPT.
     - [ ] Implémenter le script de détection d'URL.
-- [ ] Task: Interface utilisateur de confirmation et de capture
+- [x] Task: Interface utilisateur de confirmation et de capture [2549ac3]
     - [ ] Écrire les tests pour l'affichage du bouton de confirmation.
     - [ ] Implémenter l'injection du bouton de confirmation sur les pages ChatGPT.
     - [ ] Écrire les tests pour la capture des données de la conversation (titre, date, etc.).
