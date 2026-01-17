@@ -2,23 +2,23 @@
 
 Cette track vise à implémenter le Produit Minimum Viable (MVP) d'AgregLLM, comprenant l'extension de navigateur pour ChatGPT et l'application web de base pour la liste et la visualisation des conversations.
 
-## Phase 1 : Extension de Navigateur pour ChatGPT
+## Phase 1 : Extension de Navigateur pour ChatGPT [checkpoint: 0d77f81]
 
 - [x] Task: Initialiser le projet d'extension (Manifest V3) [910f93e]
-    - [ ] Écrire les tests pour la structure de base du Manifest V3.
-    - [ ] Implémenter la structure de base du Manifest V3 (manifest.json, background.js).
+    - [x] Écrire les tests pour la structure de base du Manifest V3.
+    - [x] Implémenter la structure de base du Manifest V3 (manifest.json, background.js).
 - [x] Task: Détection et capture des URL de conversations ChatGPT [695a0ce]
-    - [ ] Écrire les tests pour la détection d'URL de conversations ChatGPT.
-    - [ ] Implémenter le script de détection d'URL.
+    - [x] Écrire les tests pour la détection d'URL de conversations ChatGPT.
+    - [x] Implémenter le script de détection d'URL.
 - [x] Task: Interface utilisateur de confirmation et de capture [2549ac3]
-    - [ ] Écrire les tests pour l'affichage du bouton de confirmation.
-    - [ ] Implémenter l'injection du bouton de confirmation sur les pages ChatGPT.
-    - [ ] Écrire les tests pour la capture des données de la conversation (titre, date, etc.).
-    - [ ] Implémenter la logique de capture des données au clic sur le bouton.
+    - [x] Écrire les tests pour l'affichage du bouton de confirmation.
+    - [x] Implémenter l'injection du bouton de confirmation sur les pages ChatGPT.
+    - [x] Écrire les tests pour la capture des données de la conversation (titre, date, etc.).
+    - [x] Implémenter la logique de capture des données au clic sur le bouton.
 - [x] Task: Communication de l'extension vers l'application web [5399d6e]
-    - [ ] Écrire les tests pour l'envoi sécurisé des données capturées à l'application web.
-    - [ ] Implémenter le mécanisme de communication (e.g., `chrome.runtime.sendMessage`).
-- [ ] Task: Conductor - User Manual Verification 'Extension de Navigateur pour ChatGPT' (Protocol in workflow.md)
+    - [x] Écrire les tests pour l'envoi sécurisé des données capturées à l'application web.
+    - [x] Implémenter le mécanisme de communication (e.g., `chrome.runtime.sendMessage`).
+- [x] Task: Conductor - User Manual Verification 'Extension de Navigateur pour ChatGPT' (Protocol in workflow.md) [0d77f81]
 
 ## Phase 2 : Application Web AgregLLM (Frontend de base)
 
