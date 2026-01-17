@@ -10,7 +10,7 @@ function isChatGPTConversationURL(url) {
   if (!url) {
     return false;
   }
-  // Regex pour correspondre au format UUID : 8-4-4-4-12 caractères hexadécimaux
-  const chatGPTPattern = /^https:\/\/chat\.openai\.com\/c\/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/;
+  // Support pour chat.openai.com et chatgpt.com avec format UUID
+  const chatGPTPattern = /^https:\/\/(chat\.openai\.com|chatgpt\.com)\/c\/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/;
   return chatGPTPattern.test(url);
 }

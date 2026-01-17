@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "AgregLLM",
+  "version": "0.1.0",
+  "description": "Une extension pour agréger les discussions de vos LLM préférés.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://chat.openai.com/*", "https://chatgpt.com/*"],
+      "js": ["vendor/browser-polyfill.js", "scripts/url_detector.js", "scripts/content.js"]
+    }
+  ],
+  "action": {
+    "default_title": "AgregLLM",
+    "default_popup": "popup.html"
+  }
+}

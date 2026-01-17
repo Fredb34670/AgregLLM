@@ -4,22 +4,17 @@
   "version": "0.1.0",
   "description": "Une extension pour agréger les discussions de vos LLM préférés (pour Firefox).",
   "permissions": [
-    "storage",
-    "contextMenus",
-    "tabs",
-    "https://chatgpt.com/*",
-    "https://chat.openai.com/*"
+    "storage"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["vendor/browser-polyfill.js", "background.js"]
   },
   "content_scripts": [
     {
-      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
-      "js": ["scripts/content.js"]
+      "matches": ["https://chat.openai.com/*"],
+      "js": ["vendor/browser-polyfill.js", "scripts/url_detector.js", "scripts/content.js"]
     }
   ],
-
   "browser_action": {
     "default_title": "AgregLLM",
     "default_popup": "popup.html"
