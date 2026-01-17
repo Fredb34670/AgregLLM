@@ -5,12 +5,14 @@
   "description": "Une extension pour agréger les discussions de vos LLM préférés.",
   "permissions": [
     "storage",
-    "activeTab",
-    "scripting"
+    "contextMenus",
+    "tabs"
   ],
   "host_permissions": [
     "https://chat.openai.com/*",
-    "https://chatgpt.com/*"
+    "https://chatgpt.com/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -19,6 +21,10 @@
     {
       "matches": ["https://chat.openai.com/*", "https://chatgpt.com/*"],
       "js": ["vendor/browser-polyfill.js", "scripts/url_detector.js", "scripts/content.js"]
+    },
+    {
+      "matches": ["http://localhost/*", "http://127.0.0.1/*"],
+      "js": ["vendor/browser-polyfill.js", "scripts/sync.js"]
     }
   ],
   "action": {

@@ -1,38 +1,34 @@
-// background.js - Version native Firefox
+// background.js - Version robuste
 
-console.log("AgregLLM: Script de fond actif.");
-
-// Création du menu
 browser.contextMenus.create({
   id: "save-to-agregllm",
   title: "Sauvegarder dans AgregLLM",
   contexts: ["all"]
 }, () => {
-  if (browser.runtime.lastError) {
-    console.error("Erreur création menu:", browser.runtime.lastError);
-  } else {
-    console.log("Menu contextuel créé.");
-  }
+  if (browser.runtime.lastError) console.log("Menu OK");
 });
 
-// Écouteur de clic
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "save-to-agregllm") {
-    console.log("Clic détecté sur onglet:", tab.id);
     try {
-      // Envoi du message via l'API Firefox
       const response = await browser.tabs.sendMessage(tab.id, { action: "capture" });
-      console.log("Réponse reçue du script de contenu:", response);
       
       if (response && response.data) {
         const res = await browser.storage.local.get("conversations");
-        const list = res.conversations || [];
+        let list = res.conversations || [];
+        
+        // Remplacement forcé pour corriger l'ordre si nécessaire
+        list = list.filter(c => c.url !== response.data.url);
         list.push(response.data);
+        
         await browser.storage.local.set({ conversations: list });
-        console.log("AgregLLM: SAUVEGARDE RÉUSSIE !");
+        
+        // Notification Webapp
+        const tabs = await browser.tabs.query({ url: ["*://localhost/*", "*://127.0.0.1/*"] });
+        tabs.forEach(t => browser.tabs.sendMessage(t.id, { action: "sync" }).catch(()=>{}));
       }
     } catch (e) {
-      console.error("Erreur fatale communication:", e);
+      console.error("Background Error:", e);
     }
   }
 });

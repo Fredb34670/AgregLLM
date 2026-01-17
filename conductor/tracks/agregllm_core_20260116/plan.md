@@ -22,25 +22,33 @@ Cette track vise à implémenter le Produit Minimum Viable (MVP) d'AgregLLM, com
 
 ## Phase 2 : Application Web AgregLLM (Frontend de base)
 
-- [ ] Task: Initialiser l'application web React avec TypeScript et Shadcn UI
-    - [ ] Écrire les tests pour l'initialisation du projet React/TypeScript.
-    - [ ] Implémenter la configuration de base du projet React avec Shadcn UI.
-- [ ] Task: Routage et structure de page principale
-    - [ ] Écrire les tests pour le routage de base (page d'accueil, liste des conversations).
-    - [ ] Implémenter le routage et la mise en page de base avec Shadcn UI.
-- [ ] Task: Stockage local des données (IndexedDB ou localStorage)
-    - [ ] Écrire les tests pour l'ajout, la récupération et la suppression de conversations localement.
-    - [ ] Implémenter la logique de stockage local pour les conversations.
-- [ ] Task: Affichage de la liste des conversations
-    - [ ] Écrire les tests pour l'affichage correct des conversations dans une liste paginée.
-    - [ ] Implémenter le composant de liste des conversations avec pagination.
-- [ ] Task: Visualisation d'une conversation (détail)
-    - [ ] Écrire les tests pour l'affichage des détails d'une conversation (lien, titre, LLM, date).
-    - [ ] Implémenter la vue de détail d'une conversation.
-- [ ] Task: Recherche plein texte
-    - [ ] Écrire les tests pour la fonctionnalité de recherche plein texte sur les titres et descriptions.
-    - [ ] Implémenter le champ de recherche et la logique de filtrage.
-- [ ] Task: Tri par date et par titre
-    - [ ] Écrire les tests pour le tri des conversations.
-    - [ ] Implémenter les options de tri par date et par titre.
+- [x] Task: Initialiser l'application web React avec TypeScript et Shadcn UI [968600a]
+    - [x] Implémenter la configuration de base du projet React avec Shadcn UI.
+- [x] Task: Routage et structure de page principale [8afd849]
+    - [x] Écrire les tests pour le routage de base (page d'accueil, liste des conversations).
+    - [x] Implémenter le routage et la mise en page de base avec Shadcn UI.
+- [x] Task: Stockage local des données (IndexedDB ou localStorage) [8afd849]
+    - [x] Écrire les tests pour l'ajout, la récupération et la suppression de conversations localement.
+    - [x] Implémenter la logique de stockage local pour les conversations.
+- [x] Task: Affichage de la liste des conversations [8afd849]
+    - [x] Écrire les tests pour l'affichage correct des conversations dans une liste paginée.
+    - [x] Implémenter le composant de liste des conversations.
+- [x] Task: Visualisation d'une conversation (détail) [8afd849]
+    - [x] Écrire les tests pour l'affichage des détails d'une conversation (lien, titre, LLM, date).
+    - [x] Implémenter la vue de détail d'une conversation.
+- [x] Task: Recherche plein texte [8afd849]
+    - [x] Écrire les tests pour la fonctionnalité de recherche plein texte sur les titres et descriptions.
+    - [x] Implémenter le champ de recherche et la logique de filtrage.
+- [x] Task: Tri par date et par titre [8afd849]
+    - [x] Écrire les tests pour le tri des conversations.
+    - [x] Implémenter les options de tri par date et par titre.
 - [ ] Task: Conductor - User Manual Verification 'Application Web AgregLLM (Frontend de base)' (Protocol in workflow.md)
+
+## Phase 3 : Synchronisation Extension & Webapp
+
+- [x] Task: Mécanisme de synchronisation via injection de script [8afd849]
+    - [x] Implémenter le script de synchronisation `sync.js`.
+    - [x] Configurer le `manifest.json` pour autoriser l'injection sur la webapp.
+- [x] Task: Notification temps réel [8afd849]
+    - [x] Implémenter la notification des onglets webapp depuis le background script.
+    - [x] Mettre à jour la webapp pour réagir aux événements de synchronisation.
