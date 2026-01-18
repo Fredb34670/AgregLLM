@@ -46,14 +46,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         titleInput.value = currentTab.title;
         llmInput.value = detectLLM(currentTab.url);
         
-        // Tentative de récupération sommaire du contenu
+        // Tentative de récupération sommaire du contenu (Fallback)
         try {
-            const results = await browser.scripting.executeScript({
-                target: { tabId: currentTab.id },
-                func: () => document.body.innerText.substring(0, 300).replace(/\s+/g, ' ').trim() + "..."
-            });
-            if (results && results[0] && results[0].result) {
-                summaryInput.value = results[0].result;
+            let resultText = "";
+            
+            // Compatibilité V3 (Chrome)
+            if (browser.scripting && browser.scripting.executeScript) {
+                const results = await browser.scripting.executeScript({
+                    target: { tabId: currentTab.id },
+                    func: () => document.body.innerText.substring(0, 300).replace(/\s+/g, ' ').trim() + "..."
+                });
+                if (results && results[0] && results[0].result) resultText = results[0].result;
+            } 
+            // Compatibilité V2 (Firefox)
+            else if (browser.tabs.executeScript) {
+                const results = await browser.tabs.executeScript(currentTab.id, {
+                    code: "document.body.innerText.substring(0, 300).replace(/\\s+/g, ' ').trim() + '...'"
+                });
+                if (results && results[0]) resultText = results[0];
+            }
+
+            if (resultText) {
+                summaryInput.value = resultText;
                 statusDiv.textContent = "Mode manuel (Auto-résumé activé).";
             } else {
                 statusDiv.textContent = "Mode manuel (Script non détecté).";
