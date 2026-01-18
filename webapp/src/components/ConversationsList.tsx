@@ -41,6 +41,11 @@ import {
     return Array.from(tags).sort();
   }, [conversations]);
 
+  const getFolderName = (id?: string) => {
+    if (!id) return null;
+    return folders.find(f => f.id === id)?.name;
+  };
+
   const handleDelete = (e: React.MouseEvent, conversation: Conversation) => {
     e.preventDefault();
     if (confirm('Voulez-vous vraiment supprimer cette discussion d\'AgregLLM ?')) {
@@ -70,7 +75,10 @@ import {
   const filteredAndSortedConversations = useMemo(() => {
     return conversations
       .filter(conv => {
-        const matchesFolder = conv.folderId === (currentFolderId || undefined);
+        // Si un folderId est présent dans l'URL, on filtre strictement.
+        // Sinon (vue "Toutes les discussions"), on laisse tout passer.
+        const matchesFolder = !currentFolderId || conv.folderId === currentFolderId;
+        
         const matchesSearch = conv.title.toLowerCase().includes(search.toLowerCase()) ||
           conv.llm.toLowerCase().includes(search.toLowerCase()) ||
           (conv.summary && conv.summary.toLowerCase().includes(search.toLowerCase()));
@@ -201,6 +209,12 @@ import {
                     )}
                     <div className="flex items-center justify-between">
                       <div className="flex flex-wrap gap-1.5">
+                        {conv.folderId && !currentFolderId && (
+                          <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-medium border border-border flex items-center gap-1">
+                            <FolderIcon className="h-2.5 w-2.5" />
+                            {getFolderName(conv.folderId)}
+                          </span>
+                        )}
                         {(conv.tags || []).map(tag => (
                           <span key={tag} className="text-[10px] bg-primary/5 text-primary/70 px-2 py-0.5 rounded-full font-semibold border border-primary/10">
                             #{tag}
