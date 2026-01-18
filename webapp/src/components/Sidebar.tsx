@@ -319,9 +319,9 @@ export function Sidebar() {
           <div className="space-y-1">
             <p className="text-[10px] font-black uppercase text-muted-foreground/60 px-3 mb-2 tracking-widest">Non classées</p>
             {rootConversations.map(conv => (
-              <Link key={conv.id} to={`/conversations/${conv.id}`}>
+              <a key={conv.id} href={conv.url} target="_blank" rel="noopener noreferrer" className="block w-full">
                 <Button 
-                  variant={isActive(`/conversations/${conv.id}`) ? 'secondary' : 'ghost'} 
+                  variant="ghost" 
                   className="w-full justify-start gap-3 text-sm h-8 font-normal text-muted-foreground hover:text-foreground"
                   draggable="true"
                   onDragStart={(e) => {
@@ -332,7 +332,7 @@ export function Sidebar() {
                   <FileText className="h-3.5 w-3.5" /> 
                   <span className="truncate">{conv.title}</span>
                 </Button>
-              </Link>
+              </a>
             ))}
           </div>
         )}

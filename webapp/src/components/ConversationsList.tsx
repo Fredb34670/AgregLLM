@@ -173,7 +173,7 @@ import {
                 draggable="true"
                 onDragStart={(e) => handleDragStart(e, conv.id)}
               >
-                <Link to={`/conversations/${conv.id}`}>
+                <a href={conv.url} target="_blank" rel="noopener noreferrer" className="block">
                 <Card className="hover:ring-1 hover:ring-primary/20 hover:bg-muted/30 transition-all pr-12 overflow-hidden border-none shadow-sm bg-card/50 cursor-grab active:cursor-grabbing">
                   <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 gap-4">
                     <div className="flex flex-col gap-1 overflow-hidden">
@@ -189,7 +189,7 @@ import {
                     
                     <div className="flex items-center gap-3 shrink-0">
                       <p className="text-[10px] text-muted-foreground/60 font-medium whitespace-nowrap">
-                        Créée le {new Date(conv.capturedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {new Date(conv.capturedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
                     </div>
                   </CardHeader>
@@ -210,7 +210,7 @@ import {
                     </div>
                   </CardContent>
                 </Card>
-              </Link>
+              </a>
               
               <Button
                 variant="ghost"

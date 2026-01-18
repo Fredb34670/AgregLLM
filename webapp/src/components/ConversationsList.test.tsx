@@ -51,6 +51,10 @@ describe('ConversationsList', () => {
     );
     expect(screen.getByText('Conversation Test')).toBeInTheDocument();
     expect(screen.getByText('ChatGPT')).toBeInTheDocument();
+    
+    const link = screen.getByRole('link', { name: /Conversation Test/i });
+    expect(link).toHaveAttribute('href', 'http://test.com');
+    expect(link).toHaveAttribute('target', '_blank');
   });
 
   it('filtre les conversations selon la recherche', () => {
