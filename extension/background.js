@@ -1,5 +1,38 @@
 // background.js - Version robuste
 
+// Fonction pour mettre à jour l'icône selon si l'URL est sauvegardée
+async function updateIcon(tabId, url) {
+    if (!url || !url.startsWith('http')) return;
+    try {
+        const res = await browser.storage.local.get("conversations");
+        const list = res.conversations || [];
+        const isSaved = list.some(c => c.url === url);
+        
+        if (isSaved) {
+            browser.action.setBadgeText({ text: "✓", tabId });
+            browser.action.setBadgeBackgroundColor({ color: "#4CAF50", tabId });
+        } else {
+            browser.action.setBadgeText({ text: "", tabId });
+        }
+    } catch (e) {
+        console.error("Icon Update Error:", e);
+    }
+}
+
+// Écouteur de changement d'URL/onglet
+browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status === 'complete' && tab.url) {
+        updateIcon(tabId, tab.url);
+    }
+});
+
+browser.tabs.onActivated.addListener(async (activeInfo) => {
+    const tab = await browser.tabs.get(activeInfo.tabId);
+    if (tab && tab.url) {
+        updateIcon(activeInfo.tabId, tab.url);
+    }
+});
+
 browser.contextMenus.create({
   id: "save-to-agregllm",
   title: "Sauvegarder dans AgregLLM",

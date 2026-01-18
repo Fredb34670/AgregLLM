@@ -38,9 +38,9 @@
 
 ## Phase 4 : Extension Avancée
 
-- [ ] Task: Détection d'URL existante (Extension)
+- [x] Task: Détection d'URL existante (Extension)
     - Mettre à jour `content.js` pour vérifier si l'URL est déjà stockée (via message au background/webapp).
     - Changer l'état visuel du bouton ou de l'icône.
-- [ ] Task: Édition pré-sauvegarde (Popup)
+- [x] Task: Édition pré-sauvegarde (Popup)
     - Modifier la popup pour afficher un formulaire pré-rempli au lieu de sauvegarder immédiatement.
-- [ ] Task: Conductor - User Manual Verification 'Extension Avancée'
+- [x] Task: Conductor - User Manual Verification 'Extension Avancée' [05b20d8]

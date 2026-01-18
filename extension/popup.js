@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const titleInput = document.getElementById('title');
   const llmInput = document.getElementById('llm');
   const summaryInput = document.getElementById('summary');
+  const tagsInput = document.getElementById('tags');
   const saveBtn = document.getElementById('save-btn');
   const statusDiv = document.getElementById('status');
   
@@ -32,6 +33,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             titleInput.value = capturedData.title || currentTab.title;
             llmInput.value = capturedData.llm || detectLLM(currentTab.url);
             summaryInput.value = capturedData.summary || "";
+            // Auto-tags from content script if available
+            if (capturedData.tags) {
+              tagsInput.value = capturedData.tags.join(', ');
+            }
             statusDiv.textContent = "Données détectées automatiquement.";
             statusDiv.className = "status success";
         }
@@ -94,6 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           url: currentTab.url,
           llm: llmInput.value,
           summary: summaryInput.value,
+          tags: tagsInput.value.split(',').map(t => t.trim()).filter(t => t !== ""),
           date: new Date().toISOString(),
           messages: [] // Confidentiel
       };

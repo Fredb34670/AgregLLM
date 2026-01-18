@@ -81,6 +81,11 @@ function capture() {
       summary = "Aperçu non disponible.";
     }
 
+    // --- Auto-Tags ---
+    const stopWords = ['le', 'la', 'les', 'un', 'une', 'des', 'ce', 'cet', 'cette', 'ces', 'de', 'du', 'est', 'sont', 'avoir', 'être', 'faire', 'dire', 'aller'];
+    const tagSource = (title + " " + summary).toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, " ").split(/\s+/);
+    const suggestedTags = [...new Set(tagSource.filter(word => word.length > 4 && !stopWords.includes(word)))].slice(0, 3);
+
     return {
       data: {
         title: title,
@@ -88,6 +93,7 @@ function capture() {
         llm: llmName,
         date: new Date().toISOString(),
         summary: summary,
+        tags: suggestedTags,
         messages: [] 
       }
     };
