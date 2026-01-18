@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "AgregLLM",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Agrégateur de discussions LLM",
   "permissions": [
     "storage",
@@ -9,6 +9,9 @@
     "tabs",
     "https://chatgpt.com/*",
     "https://chat.openai.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://aistudio.google.com/*",
     "http://localhost/*",
     "http://127.0.0.1/*"
   ],
@@ -24,7 +27,7 @@
         "https://gemini.google.com/*",
         "https://aistudio.google.com/*"
       ],
-      "js": ["vendor/browser-polyfill.js", "vendor/turndown.js", "scripts/content.js"]
+      "js": ["vendor/browser-polyfill.js", "scripts/content.js"]
     },
     {
       "matches": ["http://localhost/*", "http://127.0.0.1/*"],

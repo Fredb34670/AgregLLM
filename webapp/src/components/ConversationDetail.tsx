@@ -4,11 +4,9 @@ import { storage } from '../lib/storage';
 import { Conversation } from '../types';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, ExternalLink, User, Bot, Tag as TagIcon, X } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { ArrowLeft, ExternalLink, Tag as TagIcon, X, Info } from 'lucide-react';
 
 export function ConversationDetail() {
   const { id } = useParams<{ id: string }>();
@@ -105,42 +103,33 @@ export function ConversationDetail() {
         </p>
       </div>
 
-      <div className="space-y-10 py-8">
-        {conversation.messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`flex flex-col ${msg.role === 'user' ? 'items-end pl-12 md:pl-24' : 'items-start pr-12 md:pr-24'}`}
-          >
-            <div className={`flex flex-col max-w-full ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-              <div className={`flex items-center gap-2 mb-2 ${msg.role === 'user' ? 'text-indigo-600 dark:text-indigo-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                {msg.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-                <span className="text-sm font-black uppercase tracking-widest">
-                  {msg.role === 'user' ? 'Vous' : conversation.llm}
-                </span>
-              </div>
-              
-              <Card className={`w-full border-none shadow-md ${
-                msg.role === 'user' 
-                  ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-none' 
-                  : 'bg-card border-l-4 border-l-emerald-500 rounded-2xl rounded-tl-none'
-              }`}>
-                <CardContent className="p-6">
-                  <div className={`prose prose-sm md:prose-base max-w-none break-words 
-                    ${msg.role === 'user' ? 'prose-invert prose-p:text-white/90' : 'dark:prose-invert text-foreground/90'} 
-                    prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-foreground/90
-                    prose-strong:font-semibold prose-strong:text-foreground
-                    prose-h1:text-xl prose-h2:text-lg prose-h3:text-base
-                    prose-ul:list-disc prose-ol:list-decimal prose-li:my-1
-                    prose-ul:marker:text-white/80 prose-ul:marker:text-base`}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {msg.content}
-                    </ReactMarkdown>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        ))}
+      {/* Résumé et Lien Externe */}
+      <div className="space-y-8 py-8">
+        <Card className="bg-card/50">
+          <CardHeader>
+            <CardTitle className="text-lg font-medium flex items-center gap-2">
+              <Info className="h-5 w-5 text-muted-foreground" />
+              Résumé / Aperçu
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-foreground/80 leading-relaxed italic">
+              {conversation.summary || "Aucun résumé disponible pour cette discussion."}
+            </p>
+          </CardContent>
+        </Card>
+
+        <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-xl bg-muted/20 text-center space-y-4">
+          <h3 className="text-xl font-semibold">Consulter la discussion complète</h3>
+          <p className="text-muted-foreground max-w-md">
+            Pour des raisons de confidentialité et de respect des conditions d'utilisation, le contenu complet des échanges n'est pas stocké dans AgregLLM.
+          </p>
+          <a href={conversation.url} target="_blank" rel="noopener noreferrer">
+            <Button size="lg" className="gap-2 mt-4">
+              Ouvrir sur {conversation.llm} <ExternalLink className="h-4 w-4" />
+            </Button>
+          </a>
+        </div>
       </div>
     </div>
   );

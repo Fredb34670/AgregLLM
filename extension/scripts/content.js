@@ -1,106 +1,114 @@
-// content.js - Version 14.0 (Restauration ChatGPT + Omni-LLM)
-const turndownService = new window.TurndownService();
-
+// content.js - Version Metadonnées Uniquement (Multi-LLM & Générique)
 function capture() {
   try {
     const hostname = window.location.hostname;
-    let llmName = "ChatGPT";
-    if (hostname.includes("claude.ai")) llmName = "Claude";
-    if (hostname.includes("gemini.google.com")) llmName = "Gemini";
-    if (hostname.includes("aistudio.google.com")) llmName = "AI Studio";
+    let llmName = "Inconnu";
+    let title = document.title;
+    let summary = "";
 
-    const titleEl = document.querySelector('h1, [class*="title"], title');
-    const title = titleEl.innerText.split('\n')[0].trim();
-    let messages = [];
-
-    // --- LOGIQUE SPÉCIFIQUE CHATGPT (Restauration) ---
-    if (llmName === "ChatGPT") {
-      const turns = Array.from(document.querySelectorAll('[data-testid^="conversation-turn-"]'));
-      turns.forEach(turn => {
-        const userEl = turn.querySelector('[data-message-author-role="user"]');
-        const assistantEl = turn.querySelector('[data-message-author-role="assistant"]');
-        if (userEl) messages.push({ role: 'user', content: turndownService.turndown(userEl.innerHTML), y: userEl.getBoundingClientRect().top });
-        if (assistantEl) {
-          const content = assistantEl.querySelector('.markdown, .prose') || assistantEl;
-          messages.push({ role: 'assistant', content: turndownService.turndown(content.innerHTML), y: assistantEl.getBoundingClientRect().top });
-        }
-      });
+    // --- ChatGPT ---
+    if (hostname.includes("chatgpt.com") || hostname.includes("openai.com")) {
+      llmName = "ChatGPT";
+      // Titre spécifique ChatGPT (souvent dans la sidebar ou header, mais document.title est fiable)
+      const titleEl = document.querySelector('div[class*="title"], h1'); 
+      if (titleEl) title = titleEl.innerText;
+      
+      // Résumé: Premier message utilisateur
+      const userMsg = document.querySelector('[data-message-author-role="user"]');
+      if (userMsg) summary = userMsg.innerText;
     } 
-    // --- LOGIQUE GEMINI & AI STUDIO ---
+    
+    // --- Claude ---
+    else if (hostname.includes("claude.ai")) {
+      llmName = "Claude";
+      // Claude met souvent le titre dans l'URL ou le titre de la page est générique "Claude".
+      // On essaie de trouver le titre dans l'interface
+      const titleEl = document.querySelector('h3, div[class*="truncate"]'); 
+      if (titleEl && titleEl.innerText.length > 2) title = titleEl.innerText;
+
+      // Résumé: Premier message utilisateur
+      // Les classes de Claude sont souvent obfusquées, on cherche un conteneur de message user
+      const userMsg = document.querySelector('.font-user-message, [data-test-id="user-message"]');
+      if (userMsg) summary = userMsg.innerText;
+    } 
+    
+    // --- Gemini ---
+    else if (hostname.includes("gemini.google.com")) {
+      llmName = "Gemini";
+      const titleEl = document.querySelector('h1[class*="title"], .conversation-title');
+      if (titleEl) title = titleEl.innerText;
+
+      const userMsg = document.querySelector('.user-query-text, user-query');
+      if (userMsg) summary = userMsg.innerText;
+    } 
+    
+    // --- AI Studio ---
+    else if (hostname.includes("aistudio.google.com")) {
+      llmName = "AI Studio";
+      const titleEl = document.querySelector('div[class*="title"]');
+      if (titleEl) title = titleEl.innerText;
+
+      const promptArea = document.querySelector('textarea, .prompt-text-area');
+      if (promptArea) summary = promptArea.value;
+    }
+
+    // --- Générique / Fallback ---
     else {
-      // Pour AI Studio, on cherche aussi le prompt initial
-      if (llmName === "AI Studio") {
-        const initialPrompt = document.querySelector('textarea, .prompt-text-area');
-        if (initialPrompt && initialPrompt.value) {
-          messages.push({ role: 'user', content: initialPrompt.value.trim(), y: -10000 });
-        }
+      // Pour tout autre site, on utilise le domaine comme nom de LLM par défaut
+      const domainParts = hostname.split('.');
+      if (domainParts.length >= 2) {
+        llmName = domainParts[domainParts.length - 2].charAt(0).toUpperCase() + domainParts[domainParts.length - 2].slice(1);
+      } else {
+        llmName = hostname;
       }
-
-      const selectors = [
-        'user-query', 'model-response', // Gemini
-        '.user-query-container', '.model-response-container', // AI Studio
-        '.request-container', '.response-container', // Legacy
-        'article', '.message-content' // Fallbacks
-      ];
-
-      const elements = Array.from(document.querySelectorAll(selectors.join(', ')));
-      elements.forEach(el => {
-        const isUser = el.tagName.toLowerCase().includes('user') || 
-                       el.classList.contains('user-query-container') ||
-                       el.classList.contains('request-container') ||
-                       el.querySelector('.user-query-text') !== null;
-
-        const contentEl = el.querySelector('.markdown, .prose, .message-content, .model-response-text, .user-query-text') || el;
-        const markdown = turndownService.turndown(contentEl.innerHTML);
-
-        if (markdown && markdown.length > 1) {
-          messages.push({
-            role: isUser ? 'user' : 'assistant',
-            content: markdown,
-            y: el.getBoundingClientRect().top + window.scrollY
-          });
-        }
-      });
+      
+      // On essaie de prendre le premier paragraphe ou h1 comme résumé par défaut si rien d'autre
+      const h1 = document.querySelector('h1');
+      if (h1) summary = h1.innerText;
     }
 
-    // Tri vertical pour tout le monde
-    messages.sort((a, b) => a.y - b.y);
-
-    // Déduplication
-    const finalMessages = [];
-    const seen = new Set();
-    messages.forEach(m => {
-      const fingerprint = m.role + m.content.substring(0, 50).replace(/\s/g, '');
-      if (fingerprint && !seen.has(fingerprint)) {
-        finalMessages.push({ role: m.role, content: m.content });
-        seen.add(fingerprint);
-      }
-    });
-
-    if (finalMessages.length > 0) {
-      return {
-        data: {
-          title: title + " [" + new Date().toLocaleTimeString() + "]",
-          url: window.location.href,
-          llm: llmName,
-          date: new Date().toISOString(),
-          summary: finalMessages[0].content.substring(0, 200),
-          messages: finalMessages
-        }
-      };
+    // Nettoyage du titre et résumé
+    title = title.trim();
+    // Si le titre est trop générique ou vide, on remet l'URL ou un défaut
+    if (!title || title.toLowerCase() === "claude" || title.toLowerCase() === "chatgpt") {
+      title = "Discussion " + llmName + " (" + new Date().toLocaleDateString() + ")";
     }
-    return { error: `Aucun message trouvé sur ${llmName}.` };
+
+    if (summary) {
+      summary = summary.trim().substring(0, 200); // Limite à 200 caractères
+      if (summary.length === 200) summary += "...";
+    } else {
+      summary = "Aperçu non disponible.";
+    }
+
+    return {
+      data: {
+        title: title,
+        url: window.location.href,
+        llm: llmName,
+        date: new Date().toISOString(),
+        summary: summary,
+        messages: [] 
+      }
+    };
+
   } catch (e) {
     return { error: e.message };
   }
 }
 
+
+// Écouteur de messages du background script (ou popup)
+if (typeof browser === "undefined") {
+    var browser = chrome;
+}
+
 browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.action === "capture") {
     const result = capture();
-    if (result.data) alert(`AgregLLM : ${result.data.messages.length} messages capturés.`);
-    else alert(`Erreur : ${result.error}`);
+    // Feedback minimal ou géré par l'appelant
+    // if (result.data) console.log("AgregLLM : Métadonnées capturées.");
     sendResponse(result);
   }
-  return true;
+  return true; // Indique une réponse asynchrone possible (standard)
 });

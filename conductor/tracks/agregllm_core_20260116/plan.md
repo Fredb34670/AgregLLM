@@ -15,40 +15,42 @@ Cette track vise à implémenter le Produit Minimum Viable (MVP) d'AgregLLM, com
     - [x] Implémenter l'injection du bouton de confirmation sur les pages ChatGPT.
     - [x] Écrire les tests pour la capture des données de la conversation (titre, date, etc.).
     - [x] Implémenter la logique de capture des données au clic sur le bouton.
+    - [x] Simplifier la capture : Ne plus capturer le contenu des messages, uniquement les métadonnées (Titre, URL, Date, LLM) et un résumé sommaire. (Mise à jour suite aux nouvelles directives de confidentialité).
 - [x] Task: Communication de l'extension vers l'application web [5399d6e]
     - [x] Écrire les tests pour l'envoi sécurisé des données capturées à l'application web.
     - [x] Implémenter le mécanisme de communication (e.g., `chrome.runtime.sendMessage`).
 - [x] Task: Conductor - User Manual Verification 'Extension de Navigateur pour ChatGPT' (Protocol in workflow.md) [0d77f81]
 
-## Phase 2 : Application Web AgregLLM (Frontend de base)
+## Phase 2 : Application Web AgregLLM (Frontend de base) [checkpoint: d751d8a]
 
 - [x] Task: Initialiser l'application web React avec TypeScript et Shadcn UI [968600a]
     - [x] Implémenter la configuration de base du projet React avec Shadcn UI.
-- [x] Task: Routage et structure de page principale [8afd849]
+- [x] Task: Routage et structure de page principale [a6f024c]
     - [x] Écrire les tests pour le routage de base (page d'accueil, liste des conversations).
     - [x] Implémenter le routage et la mise en page de base avec Shadcn UI.
-- [x] Task: Stockage local des données (IndexedDB ou localStorage) [8afd849]
+- [x] Task: Stockage local des données (IndexedDB ou localStorage) [a6f024c]
     - [x] Écrire les tests pour l'ajout, la récupération et la suppression de conversations localement.
     - [x] Implémenter la logique de stockage local pour les conversations.
-- [x] Task: Affichage de la liste des conversations [8afd849]
+- [x] Task: Affichage de la liste des conversations [a6f024c]
     - [x] Écrire les tests pour l'affichage correct des conversations dans une liste paginée.
     - [x] Implémenter le composant de liste des conversations.
-- [x] Task: Visualisation d'une conversation (détail) [8afd849]
+- [x] Task: Visualisation d'une conversation (détail) [a6f024c]
     - [x] Écrire les tests pour l'affichage des détails d'une conversation (lien, titre, LLM, date).
     - [x] Implémenter la vue de détail d'une conversation.
-- [x] Task: Recherche plein texte [8afd849]
+- [x] Task: Recherche plein texte [a6f024c]
     - [x] Écrire les tests pour la fonctionnalité de recherche plein texte sur les titres et descriptions.
     - [x] Implémenter le champ de recherche et la logique de filtrage.
-- [x] Task: Tri par date et par titre [8afd849]
+- [x] Task: Tri par date et par titre [a6f024c]
     - [x] Écrire les tests pour le tri des conversations.
     - [x] Implémenter les options de tri par date et par titre.
-- [ ] Task: Conductor - User Manual Verification 'Application Web AgregLLM (Frontend de base)' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Application Web AgregLLM (Frontend de base)' (Protocol in workflow.md) [d751d8a]
 
 ## Phase 3 : Synchronisation Extension & Webapp
 
-- [x] Task: Mécanisme de synchronisation via injection de script [8afd849]
+- [x] Task: Mécanisme de synchronisation via injection de script [a6f024c]
     - [x] Implémenter le script de synchronisation `sync.js`.
     - [x] Configurer le `manifest.json` pour autoriser l'injection sur la webapp.
-- [x] Task: Notification temps réel [8afd849]
+- [x] Task: Notification temps réel [a6f024c]
     - [x] Implémenter la notification des onglets webapp depuis le background script.
     - [x] Mettre à jour la webapp pour réagir aux événements de synchronisation.
+- [~] Task: Conductor - User Manual Verification 'Synchronisation Extension & Webapp' (Protocol in workflow.md)

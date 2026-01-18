@@ -34,10 +34,8 @@ describe('ConversationDetail', () => {
       llm: 'ChatGPT',
       capturedAt: Date.now(),
       url: 'http://test.com',
-      messages: [
-        { role: 'user', content: 'Mon message' },
-        { role: 'assistant', content: 'Ma réponse' }
-      ]
+      summary: 'Ceci est un résumé de test',
+      messages: []
     });
     render(
       <MemoryRouter initialEntries={['/conversations/1']}>
@@ -47,7 +45,8 @@ describe('ConversationDetail', () => {
       </MemoryRouter>
     );
     expect(screen.getByText('Ma Conversation')).toBeInTheDocument();
-    expect(screen.getByText('Mon message')).toBeInTheDocument();
-    expect(screen.getByText('Ma réponse')).toBeInTheDocument();
+    expect(screen.getByText('Ceci est un résumé de test')).toBeInTheDocument();
+    expect(screen.getByText(/Consulter la discussion complète/i)).toBeInTheDocument();
+    expect(screen.getByText(/confidentialité/i)).toBeInTheDocument();
   });
 });

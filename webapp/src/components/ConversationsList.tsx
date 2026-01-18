@@ -1,22 +1,36 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useLocation, Link } from 'react-router-dom';
 import { storage } from '../lib/storage';
-import { Conversation } from '../types';
+import { Conversation, Folder } from '../types';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Link } from 'react-router-dom';
-import { Search, Trash2, ExternalLink } from 'lucide-react';
-
-export function ConversationsList() {
+import {
+    Search, 
+    Trash2, 
+    Folder as FolderIcon, 
+    ChevronRight
+  } from 'lucide-react';export function ConversationsList() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'title'>('date');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   
-  const refreshConversations = () => {
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const currentFolderId = query.get('folder');
+
+  const refreshData = () => {
     setConversations(storage.getAllConversations());
+    setFolders(storage.getAllFolders());
   };
+
+  const currentFolder = useMemo(() => {
+    if (!currentFolderId) return null;
+    return folders.find(f => f.id === currentFolderId);
+  }, [folders, currentFolderId]);
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -33,27 +47,34 @@ export function ConversationsList() {
       window.dispatchEvent(new CustomEvent('agregllm-delete-request', { 
         detail: { url: conversation.url } 
       }));
-      refreshConversations();
+      refreshData();
     }
   };
 
+  const handleDragStart = (e: React.DragEvent, conversationId: string) => {
+    e.dataTransfer.setData('text/plain', conversationId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
   useEffect(() => {
-    refreshConversations();
-    window.addEventListener('storage', refreshConversations);
-    window.addEventListener('agregllm-sync-complete', refreshConversations);
+    refreshData();
+    window.addEventListener('storage', refreshData);
+    window.addEventListener('agregllm-sync-complete', refreshData);
     return () => {
-      window.removeEventListener('storage', refreshConversations);
-      window.removeEventListener('agregllm-sync-complete', refreshConversations);
+      window.removeEventListener('storage', refreshData);
+      window.removeEventListener('agregllm-sync-complete', refreshData);
     };
   }, []);
 
   const filteredAndSortedConversations = useMemo(() => {
     return conversations
       .filter(conv => {
+        const matchesFolder = conv.folderId === (currentFolderId || undefined);
         const matchesSearch = conv.title.toLowerCase().includes(search.toLowerCase()) ||
-          conv.llm.toLowerCase().includes(search.toLowerCase());
+          conv.llm.toLowerCase().includes(search.toLowerCase()) ||
+          (conv.summary && conv.summary.toLowerCase().includes(search.toLowerCase()));
         const matchesTag = !selectedTag || (conv.tags || []).includes(selectedTag);
-        return matchesSearch && matchesTag;
+        return matchesFolder && matchesSearch && matchesTag;
       })
       .sort((a, b) => {
         if (sortBy === 'date') {
@@ -62,56 +83,41 @@ export function ConversationsList() {
           return a.title.localeCompare(b.title);
         }
       });
-  }, [conversations, search, sortBy, selectedTag]);
-
-  if (conversations.length === 0) {
-    return (
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Liste des conversations</h2>
-        <Card>
-          <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground italic">Aucune conversation capturée pour le moment.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  }, [conversations, search, sortBy, selectedTag, currentFolderId]);
 
   return (
     <div className="space-y-6">
+      {/* Header et Filtres */}
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-        <h2 className="text-3xl font-bold">Conversations</h2>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <Link to="/conversations" className="hover:text-primary transition-colors">Discussions</Link>
+            {currentFolder && (
+              <>
+                <ChevronRight className="h-4 w-4" />
+                <span className="text-foreground font-medium">{currentFolder.name}</span>
+              </>
+            )}
+          </div>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {currentFolder ? currentFolder.name : "Toutes les discussions"}
+          </h2>
+        </div>
+        
         <div className="relative w-full md:w-72">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Rechercher une conversation..."
-            className="pl-8"
+            placeholder="Rechercher..."
+            className="pl-8 bg-muted/20 border-none focus-visible:ring-1 focus-visible:ring-primary"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex gap-2 border-r pr-4 mr-2">
-          <Badge 
-            variant={sortBy === 'date' ? 'default' : 'outline'}
-            className="cursor-pointer"
-            onClick={() => setSortBy('date')}
-          >
-            Plus récentes
-          </Badge>
-          <Badge 
-            variant={sortBy === 'title' ? 'default' : 'outline'}
-            className="cursor-pointer"
-            onClick={() => setSortBy('title')}
-          >
-            Par titre
-          </Badge>
-        </div>
-        
-        <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-4 py-2 border-y border-border/40">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge 
             variant={selectedTag === null ? 'secondary' : 'outline'}
             className="cursor-pointer border-dashed"
@@ -123,62 +129,86 @@ export function ConversationsList() {
             <Badge 
               key={tag}
               variant={selectedTag === tag ? 'default' : 'outline'}
-              className={`cursor-pointer ${selectedTag === tag ? 'bg-primary/80' : 'bg-primary/5 text-primary border-primary/20'}`}
+              className={`cursor-pointer ${selectedTag === tag ? '' : 'bg-primary/5 text-primary border-primary/20 hover:bg-primary/10'}`}
               onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
             >
               #{tag}
             </Badge>
           ))}
         </div>
+
+        <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-lg">
+          <Button 
+            variant={sortBy === 'date' ? 'secondary' : 'ghost'}
+            size="sm"
+            className="h-7 text-xs px-2"
+            onClick={() => setSortBy('date')}
+          >
+            Récentes
+          </Button>
+          <Button 
+            variant={sortBy === 'title' ? 'secondary' : 'ghost'}
+            size="sm"
+            className="h-7 text-xs px-2"
+            onClick={() => setSortBy('title')}
+          >
+            A-Z
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4">
         {filteredAndSortedConversations.length > 0 ? (
           filteredAndSortedConversations.map((conv) => (
-            <div key={conv.id} className="relative group">
+            <div 
+              key={conv.id} 
+              className="relative group"
+              draggable="true"
+              onDragStart={(e) => handleDragStart(e, conv.id)}
+            >
               <Link to={`/conversations/${conv.id}`}>
-                <Card className="hover:bg-muted/50 transition-colors pr-12 overflow-hidden">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-lg font-medium truncate pr-4">
-                      {conv.title}
-                    </CardTitle>
-                    <a 
-                      href={conv.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Badge variant="secondary" className="shrink-0 hover:bg-secondary/80 cursor-pointer flex gap-1 items-center">
-                        {conv.llm}
-                        <ExternalLink className="h-3 w-3" />
-                      </Badge>
-                    </a>
+                <Card className="hover:ring-1 hover:ring-primary/20 hover:bg-muted/30 transition-all pr-12 overflow-hidden border-none shadow-sm bg-card/50 cursor-grab active:cursor-grabbing">
+                  <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 gap-4">
+                    <div className="flex flex-col gap-1 overflow-hidden">
+                      <div className="flex items-center justify-between w-full">
+                        <CardTitle className="text-lg font-bold truncate group-hover:text-primary transition-colors">
+                          {conv.title}
+                        </CardTitle>
+                        <Badge variant="outline" className="ml-2 bg-primary/5 text-primary/70 border-primary/10">
+                          {conv.llm}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 shrink-0">
+                      <p className="text-[10px] text-muted-foreground/60 font-medium whitespace-nowrap">
+                        Créée le {new Date(conv.capturedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </p>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     {conv.summary && (
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                        {conv.summary}
+                      <p className="text-sm text-muted-foreground line-clamp-3 mb-4 italic leading-relaxed">
+                        "{conv.summary}"
                       </p>
                     )}
-                    <div className="flex items-center justify-between mt-auto">
-                      <div className="flex flex-wrap gap-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap gap-1.5">
                         {(conv.tags || []).map(tag => (
-                          <span key={tag} className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-medium">
+                          <span key={tag} className="text-[10px] bg-primary/5 text-primary/70 px-2 py-0.5 rounded-full font-semibold border border-primary/10">
                             #{tag}
                           </span>
                         ))}
                       </div>
-                      <p className="text-[10px] text-muted-foreground/70">
-                        {new Date(conv.capturedAt).toLocaleDateString()}
-                      </p>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
+              
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 onClick={(e) => handleDelete(e, conv)}
                 title="Supprimer la discussion"
               >
@@ -187,7 +217,11 @@ export function ConversationsList() {
             </div>
           )) 
         ) : (
-          <p className="text-center py-12 text-muted-foreground">Aucun résultat pour votre recherche.</p>
+          <div className="flex flex-col items-center justify-center py-20 bg-muted/10 rounded-2xl border-2 border-dashed border-muted">
+            <FolderIcon className="h-12 w-12 text-muted-foreground/30 mb-4" />
+            <p className="text-muted-foreground font-medium">Aucune conversation trouvée ici.</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Capturez des discussions ou déplacez-les dans ce dossier.</p>
+          </div>
         )}
       </div>
     </div>

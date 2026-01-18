@@ -7,6 +7,7 @@
     "storage",
     "contextMenus",
     "tabs",
+    "activeTab",
     "https://chatgpt.com/*",
     "https://chat.openai.com/*",
     "https://claude.ai/*",
@@ -27,7 +28,7 @@
         "https://gemini.google.com/*",
         "https://aistudio.google.com/*"
       ],
-      "js": ["vendor/browser-polyfill.js", "vendor/turndown.js", "scripts/content.js"]
+      "js": ["vendor/browser-polyfill.js", "scripts/content.js"]
     },
     {
       "matches": ["http://localhost/*", "http://127.0.0.1/*"],

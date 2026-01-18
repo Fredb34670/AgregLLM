@@ -20,6 +20,6 @@ describe('Routage de base', () => {
       </MemoryRouter>
     );
     // Ce test échouera tant que nous n'avons pas implémenté le routage
-    expect(screen.getByText(/Liste des conversations/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Toutes les discussions/i).length).toBeGreaterThan(0);
   });
 });

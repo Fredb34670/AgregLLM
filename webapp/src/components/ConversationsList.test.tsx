@@ -7,6 +7,7 @@ import { storage } from '../lib/storage';
 vi.mock('../lib/storage', () => ({
   storage: {
     getAllConversations: vi.fn(),
+    getAllFolders: vi.fn().mockReturnValue([]),
   }
 }));
 
@@ -22,7 +23,7 @@ describe('ConversationsList', () => {
         <ConversationsList />
       </MemoryRouter>
     );
-    expect(screen.getByText(/Aucune conversation capturée/i)).toBeInTheDocument();
+    expect(screen.getByText(/Aucune conversation trouvée ici/i)).toBeInTheDocument();
   });
 
   it('affiche la liste des conversations quand elles existent', () => {
