@@ -1,15 +1,18 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "AgregLLM",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Agrégateur de discussions LLM",
   "permissions": [
     "storage",
     "contextMenus",
     "tabs",
     "activeTab",
-    "https://chatgpt.com/*",
+    "scripting"
+  ],
+  "host_permissions": [
     "https://chat.openai.com/*",
+    "https://chatgpt.com/*",
     "https://claude.ai/*",
     "https://gemini.google.com/*",
     "https://aistudio.google.com/*",
@@ -17,13 +20,13 @@
     "http://127.0.0.1/*"
   ],
   "background": {
-    "scripts": ["vendor/browser-polyfill.js", "background.js"]
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
       "matches": [
-        "https://chatgpt.com/*", 
-        "https://chat.openai.com/*",
+        "https://chat.openai.com/*", 
+        "https://chatgpt.com/*",
         "https://claude.ai/*",
         "https://gemini.google.com/*",
         "https://aistudio.google.com/*"
@@ -35,7 +38,8 @@
       "js": ["vendor/browser-polyfill.js", "scripts/sync.js"]
     }
   ],
-  "browser_action": {
+  "action": {
+    "default_title": "AgregLLM",
     "default_popup": "popup.html"
   }
 }
