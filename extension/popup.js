@@ -81,13 +81,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   const titleInput = document.getElementById('title');
   const llmInput = document.getElementById('llm');
   const dateInput = document.getElementById('date');
+  const dateWrapper = document.getElementById('date-wrapper');
   const summaryInput = document.getElementById('summary');
-  const tagsInput = document.getElementById('tags');
-  const saveBtn = document.getElementById('save-btn');
-  const statusDiv = document.getElementById('status');
   
   // Par défaut, date du jour
   dateInput.value = new Date().toISOString().split('T')[0];
+
+  // Ouvrir le calendrier au clic sur le champ ou l'icône
+  dateWrapper.addEventListener('click', () => {
+    try {
+      if (dateInput.showPicker) {
+        dateInput.showPicker();
+      } else {
+        dateInput.focus();
+      }
+    } catch (e) {
+      dateInput.focus();
+    }
+  });
   
   let currentTab = null;
 

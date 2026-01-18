@@ -46,6 +46,21 @@
       border-color: #6366f1;
       ring: 2px solid #e0e7ff;
     }
+    .date-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .date-container input {
+      padding-left: 36px;
+      cursor: pointer;
+    }
+    .calendar-icon {
+      position: absolute;
+      left: 10px;
+      color: #64748b;
+      pointer-events: none;
+    }
     button {
       width: 100%;
       background-color: #4f46e5;
@@ -94,7 +109,10 @@
 
     <div class="field">
       <label for="date">Date de la discussion</label>
-      <input type="date" id="date">
+      <div class="date-container" id="date-wrapper">
+        <svg class="calendar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <input type="date" id="date">
+      </div>
     </div>
 
     <div class="field">
