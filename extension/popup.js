@@ -1,6 +1,80 @@
-// popup.js - Gestion de la popup
+// popup.js - Injection Directe Robuste (V2 & V3)
 if (typeof browser === "undefined") {
     var browser = chrome;
+}
+
+// Logique de capture à injecter (doit être autonome)
+function capturePageLogic() {
+    try {
+        const hostname = window.location.hostname;
+        let llmName = "Inconnu";
+        let title = document.title;
+        let summary = "";
+
+        // --- ChatGPT ---
+        if (hostname.includes("chatgpt.com") || hostname.includes("openai.com")) {
+            llmName = "ChatGPT";
+            const titleEl = document.querySelector('div[class*="title"], h1'); 
+            if (titleEl) title = titleEl.innerText;
+            
+            const userMsg = document.querySelector('[data-message-author-role="user"]');
+            if (userMsg) summary = userMsg.innerText;
+        } 
+        
+        // --- Claude ---
+        else if (hostname.includes("claude.ai")) {
+            llmName = "Claude";
+            const titleEl = document.querySelector('h3, div[class*="truncate"]'); 
+            if (titleEl && titleEl.innerText.length > 2) title = titleEl.innerText;
+            const userMsg = document.querySelector('.font-user-message, [data-test-id="user-message"]');
+            if (userMsg) summary = userMsg.innerText;
+        } 
+        
+        // --- Gemini ---
+        else if (hostname.includes("gemini.google.com")) {
+            llmName = "Gemini";
+            const titleEl = document.querySelector('h1[class*="title"], .conversation-title');
+            if (titleEl) title = titleEl.innerText;
+            const userMsg = document.querySelector('.user-query-text, user-query');
+            if (userMsg) summary = userMsg.innerText;
+        }
+
+        // --- Fallback Général ---
+        else {
+            const domainParts = hostname.split('.');
+            if (domainParts.length >= 2) {
+                llmName = domainParts[domainParts.length - 2].charAt(0).toUpperCase() + domainParts[domainParts.length - 2].slice(1);
+            } else {
+                llmName = hostname;
+            }
+            const h1 = document.querySelector('h1');
+            if (h1) summary = h1.innerText;
+        }
+
+        // Nettoyage
+        title = title.trim();
+        if (summary) {
+            summary = summary.trim().substring(0, 300);
+            if (summary.length === 300) summary += "...";
+        } else {
+            // Fallback résumé brutal si rien trouvé
+            summary = document.body.innerText.substring(0, 300).replace(/\s+/g, ' ').trim() + "...";
+        }
+
+        // Auto-Tags
+        const stopWords = ['le', 'la', 'les', 'un', 'une', 'des', 'ce', 'cet', 'cette', 'ces', 'de', 'du', 'est', 'sont', 'avoir', 'être', 'faire', 'dire', 'aller'];
+        const tagSource = (title + " " + summary).toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, " ").split(/\s+/);
+        const suggestedTags = [...new Set(tagSource.filter(word => word.length > 4 && !stopWords.includes(word)))].slice(0, 3);
+
+        return {
+            title,
+            llm: llmName,
+            summary,
+            tags: suggestedTags
+        };
+    } catch (e) {
+        return { error: e.message };
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -12,10 +86,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const statusDiv = document.getElementById('status');
   
   let currentTab = null;
-  let capturedData = null;
 
   try {
-    // 1. Récupérer l'onglet actif
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     currentTab = tabs[0];
     
@@ -25,61 +97,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // 2. Essayer de communiquer avec le content script (si présent)
+    // Injection Directe (Compatible V2/V3)
+    let extracted = null;
+    
     try {
-        console.log("AgregLLM Popup: Envoi demande capture à l'onglet", currentTab.id);
-        const response = await browser.tabs.sendMessage(currentTab.id, { action: "capture" });
-        console.log("AgregLLM Popup: Réponse reçue", response);
-        if (response && response.data) {
-            capturedData = response.data;
-            titleInput.value = capturedData.title || currentTab.title;
-            llmInput.value = capturedData.llm || detectLLM(currentTab.url);
-            summaryInput.value = capturedData.summary || "";
-            // Auto-tags from content script if available
-            if (capturedData.tags) {
-              tagsInput.value = capturedData.tags.join(', ');
-            }
-            statusDiv.textContent = "Données détectées automatiquement.";
-            statusDiv.className = "status success";
+        if (browser.scripting && browser.scripting.executeScript) {
+            // V3 (Chrome)
+            const results = await browser.scripting.executeScript({
+                target: { tabId: currentTab.id },
+                func: capturePageLogic
+            });
+            if (results && results[0] && results[0].result) extracted = results[0].result;
+        } else if (browser.tabs.executeScript) {
+            // V2 (Firefox)
+            // On convertit la fonction en chaîne de caractères pour l'injecter
+            const code = `(${capturePageLogic.toString()})();`;
+            const results = await browser.tabs.executeScript(currentTab.id, { code });
+            if (results && results[0]) extracted = results[0];
         }
-    } catch (e) {
-        // Pas de content script ou erreur => Mode Fallback
-        console.log("Mode Fallback (Pas de content script):", e);
-        titleInput.value = currentTab.title;
-        llmInput.value = detectLLM(currentTab.url);
-        
-        // Tentative de récupération sommaire du contenu (Fallback)
-        try {
-            let resultText = "";
-            
-            // Compatibilité V3 (Chrome)
-            if (browser.scripting && browser.scripting.executeScript) {
-                const results = await browser.scripting.executeScript({
-                    target: { tabId: currentTab.id },
-                    func: () => document.body.innerText.substring(0, 300).replace(/\s+/g, ' ').trim() + "..."
-                });
-                if (results && results[0] && results[0].result) resultText = results[0].result;
-            } 
-            // Compatibilité V2 (Firefox)
-            else if (browser.tabs.executeScript) {
-                const results = await browser.tabs.executeScript(currentTab.id, {
-                    code: "document.body.innerText.substring(0, 300).replace(/\\s+/g, ' ').trim() + '...'"
-                });
-                if (results && results[0]) resultText = results[0];
-            }
+    } catch (injectionError) {
+        console.error("Erreur injection:", injectionError);
+        statusDiv.textContent = "Erreur accès page : " + injectionError.message;
+    }
 
-            if (resultText) {
-                summaryInput.value = resultText;
-                statusDiv.textContent = "Mode manuel (Auto-résumé activé).";
-            } else {
-                statusDiv.textContent = "Mode manuel (Script non détecté).";
-            }
-        } catch (scriptError) {
-             console.log("Scripting error:", scriptError);
-             statusDiv.textContent = "Mode manuel.";
-        }
+    if (extracted && !extracted.error) {
+        titleInput.value = extracted.title || currentTab.title;
+        llmInput.value = extracted.llm || "Web";
+        summaryInput.value = extracted.summary || "";
+        if (extracted.tags) tagsInput.value = extracted.tags.join(', ');
         
-        statusDiv.className = "status";
+        statusDiv.textContent = "Données récupérées.";
+        statusDiv.className = "status success";
+    } else {
+        // Fallback ultime si l'injection échoue totalement (ex: page restreinte)
+        titleInput.value = currentTab.title;
+        llmInput.value = new URL(currentTab.url).hostname;
+        statusDiv.textContent = "Mode manuel (Accès page bloqué).";
     }
 
   } catch (err) {
@@ -87,28 +140,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     statusDiv.className = "status error";
   }
 
-  // Fonction de détection basique du LLM
-  function detectLLM(url) {
-      if (!url) return "Web";
-      const hostname = new URL(url).hostname;
-      if (hostname.includes('openai') || hostname.includes('chatgpt')) return 'ChatGPT';
-      if (hostname.includes('claude')) return 'Claude';
-      if (hostname.includes('gemini') || hostname.includes('google')) return 'Gemini';
-      if (hostname.includes('mistral')) return 'Mistral';
-      if (hostname.includes('perplexity')) return 'Perplexity';
-      
-      const parts = hostname.split('.');
-      if (parts.length >= 2) {
-         const name = parts[parts.length - 2];
-         return name.charAt(0).toUpperCase() + name.slice(1);
-      }
-      return hostname;
-  }
-
-  // Sauvegarde
   saveBtn.addEventListener('click', async () => {
       saveBtn.disabled = true;
-      saveBtn.textContent = "Sauvegarde en cours...";
+      saveBtn.textContent = "Sauvegarde...";
 
       const dataToSave = {
           title: titleInput.value,
@@ -117,26 +151,18 @@ document.addEventListener('DOMContentLoaded', async () => {
           summary: summaryInput.value,
           tags: tagsInput.value.split(',').map(t => t.trim()).filter(t => t !== ""),
           date: new Date().toISOString(),
-          messages: [] // Confidentiel
+          messages: []
       };
 
       try {
-          // Envoyer au background script pour stockage
-          await browser.runtime.sendMessage({
-              action: "save_conversation",
-              data: dataToSave
-          });
-          
-          statusDiv.textContent = "Sauvegardé avec succès !";
+          await browser.runtime.sendMessage({ action: "save_conversation", data: dataToSave });
+          statusDiv.textContent = "Sauvegardé !";
           statusDiv.className = "status success";
-          saveBtn.textContent = "Sauvegardé";
           setTimeout(() => window.close(), 1000);
-
       } catch (e) {
-          statusDiv.textContent = "Erreur de sauvegarde: " + e.message;
+          statusDiv.textContent = "Erreur: " + e.message;
           statusDiv.className = "status error";
           saveBtn.disabled = false;
-          saveBtn.textContent = "Réessayer";
       }
   });
 });
