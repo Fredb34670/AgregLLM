@@ -2,23 +2,29 @@
 console.log("AgregLLM: Content script chargé sur", window.location.href);
 
 function capture() {
+  console.log("AgregLLM: Exécution de capture()...");
   try {
-    console.log("AgregLLM: Début de la capture...");
     const hostname = window.location.hostname;
     let llmName = "Inconnu";
     let title = document.title;
     let summary = "";
 
+    console.log("AgregLLM: Hostname détecté:", hostname);
+
     // --- ChatGPT ---
     if (hostname.includes("chatgpt.com") || hostname.includes("openai.com")) {
       llmName = "ChatGPT";
-      // Titre spécifique ChatGPT (souvent dans la sidebar ou header, mais document.title est fiable)
-      const titleEl = document.querySelector('div[class*="title"], h1'); 
-      if (titleEl) title = titleEl.innerText;
+      try {
+          const titleEl = document.querySelector('div[class*="title"], h1'); 
+          if (titleEl) title = titleEl.innerText;
+          console.log("AgregLLM: Titre ChatGPT trouvé:", title);
+      } catch (e) { console.error("AgregLLM: Erreur titre ChatGPT", e); }
       
-      // Résumé: Premier message utilisateur
-      const userMsg = document.querySelector('[data-message-author-role="user"]');
-      if (userMsg) summary = userMsg.innerText;
+      try {
+          const userMsg = document.querySelector('[data-message-author-role="user"]');
+          if (userMsg) summary = userMsg.innerText;
+          console.log("AgregLLM: Résumé ChatGPT trouvé:", summary ? "Oui" : "Non");
+      } catch (e) { console.error("AgregLLM: Erreur résumé ChatGPT", e); }
     } 
     
     // --- Claude ---
@@ -116,9 +122,16 @@ if (typeof browser === "undefined") {
 
 browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   console.log("AgregLLM: Message reçu", msg);
+  
   if (msg.action === "capture") {
+    // On retourne une promesse ou on appelle sendResponse directement
+    // Pour Firefox/Chrome compatibilité, le return true est important pour l'asynchrone
+    // Mais ici capture() est synchrone.
     const result = capture();
+    console.log("AgregLLM: Envoi réponse", result);
     sendResponse(result);
   }
-  return true; // Indique une réponse asynchrone possible (standard)
+  
+  // Important pour la compatibilité Firefox si on voulait faire de l'async
+  // return true; 
 });
