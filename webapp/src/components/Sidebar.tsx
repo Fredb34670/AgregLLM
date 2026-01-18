@@ -5,9 +5,9 @@ import { Folder, Conversation } from '../types';
 import { buildFolderTree, FolderNode } from '../lib/folder-tree';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Home, 
-  MessageSquare, 
+  Home,   MessageSquare, 
   FolderPlus, 
   Folder as FolderIcon, 
   Trash2, 
@@ -261,9 +261,21 @@ export function Sidebar() {
           </div>
         </div>
 
-        {isExpanded && node.children.map(child => (
-          <FolderItem key={child.id} node={child} depth={depth + 1} />
-        ))}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              {node.children.map(child => (
+                <FolderItem key={child.id} node={child} depth={depth + 1} />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   };

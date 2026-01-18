@@ -28,13 +28,13 @@
 
 ## Phase 3 : Améliorations UI/UX et Tags
 
-- [ ] Task: Page de Gestion des Tags
+- [x] Task: Page de Gestion des Tags
     - Créer une section dans "Paramètres" pour lister tous les tags.
     - Permettre l'édition (renommage) et la suppression.
-- [ ] Task: Animations et Polissage Visuel
+- [x] Task: Animations et Polissage Visuel
     - Intégrer `framer-motion`.
     - Ajouter des transitions sur les listes et les modales.
-- [ ] Task: Conductor - User Manual Verification 'UI/UX et Tags'
+- [~] Task: Conductor - User Manual Verification 'UI/UX et Tags'
 
 ## Phase 4 : Extension Avancée
 

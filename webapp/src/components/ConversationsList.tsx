@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     Search, 
     Trash2, 
@@ -158,15 +159,21 @@ import {
       </div>
 
       <div className="grid gap-4">
-        {filteredAndSortedConversations.length > 0 ? (
-          filteredAndSortedConversations.map((conv) => (
-            <div 
-              key={conv.id} 
-              className="relative group"
-              draggable="true"
-              onDragStart={(e) => handleDragStart(e, conv.id)}
-            >
-              <Link to={`/conversations/${conv.id}`}>
+        <AnimatePresence mode="popLayout">
+          {filteredAndSortedConversations.length > 0 ? (
+            filteredAndSortedConversations.map((conv) => (
+              <motion.div 
+                key={conv.id} 
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className="relative group"
+                draggable="true"
+                onDragStart={(e) => handleDragStart(e, conv.id)}
+              >
+                <Link to={`/conversations/${conv.id}`}>
                 <Card className="hover:ring-1 hover:ring-primary/20 hover:bg-muted/30 transition-all pr-12 overflow-hidden border-none shadow-sm bg-card/50 cursor-grab active:cursor-grabbing">
                   <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 gap-4">
                     <div className="flex flex-col gap-1 overflow-hidden">
@@ -213,16 +220,20 @@ import {
                 title="Supprimer la discussion"
               >
                 <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )) 
-        ) : (
-          <div className="flex flex-col items-center justify-center py-20 bg-muted/10 rounded-2xl border-2 border-dashed border-muted">
-            <FolderIcon className="h-12 w-12 text-muted-foreground/30 mb-4" />
+                              </Button>
+                            </motion.div>
+                          )) 
+                        ) : (
+                          <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex flex-col items-center justify-center py-20 bg-muted/10 rounded-2xl border-2 border-dashed border-muted"
+                          >            <FolderIcon className="h-12 w-12 text-muted-foreground/30 mb-4" />
             <p className="text-muted-foreground font-medium">Aucune conversation trouvée ici.</p>
             <p className="text-xs text-muted-foreground/60 mt-1">Capturez des discussions ou déplacez-les dans ce dossier.</p>
-          </div>
+          </motion.div>
         )}
+        </AnimatePresence>
       </div>
     </div>
   );

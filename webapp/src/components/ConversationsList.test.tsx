@@ -4,6 +4,13 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ConversationsList } from './ConversationsList';
 import { storage } from '../lib/storage';
 
+vi.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, layout, initial, animate, exit, transition, ...props }: any) => <div {...props}>{children}</div>,
+  },
+  AnimatePresence: ({ children }: any) => <>{children}</>,
+}));
+
 vi.mock('../lib/storage', () => ({
   storage: {
     getAllConversations: vi.fn(),

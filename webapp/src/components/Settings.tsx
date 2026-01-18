@@ -1,11 +1,41 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { storage } from "../lib/storage";
-import { Download, Upload } from "lucide-react";
-import { useRef } from "react";
+import { Download, Upload, Tag, Trash2, Edit2 } from "lucide-react";
+import { useRef, useState, useMemo } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 export function Settings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editingTag, setEditingTag] = useState<string | null>(null);
+  const [newTagName, setNewTagName] = useState("");
+
+  const conversations = storage.getAllConversations();
+  
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    conversations.forEach(c => (c.tags || []).forEach(t => tags.add(t)));
+    return Array.from(tags).sort();
+  }, [conversations]);
+
+  const handleRenameTag = (oldName: string) => {
+    if (!newTagName.trim() || newTagName === oldName) {
+      setEditingTag(null);
+      return;
+    }
+    storage.renameTag(oldName, newTagName);
+    setEditingTag(null);
+    setNewTagName("");
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const handleDeleteTag = (tagName: string) => {
+    if (confirm(`Voulez-vous vraiment supprimer le tag #${tagName} de toutes les conversations ?`)) {
+      storage.deleteTag(tagName);
+      window.dispatchEvent(new Event('storage'));
+    }
+  };
 
   const handleExport = () => {
     const json = storage.exportData();
@@ -89,6 +119,60 @@ export function Settings() {
             <Button onClick={handleImportClick} variant="outline" className="gap-2">
               <Upload className="h-4 w-4" /> Importer
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Gestion des Tags</CardTitle>
+          <CardDescription>
+            Renommez ou supprimez vos tags globalement.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {allTags.length > 0 ? (
+              allTags.map(tag => (
+                <div key={tag} className="flex items-center gap-1 bg-muted/50 p-1 rounded-md border border-border/50 group">
+                  {editingTag === tag ? (
+                    <div className="flex items-center gap-1">
+                      <Input 
+                        className="h-7 w-32 text-xs" 
+                        value={newTagName} 
+                        onChange={(e) => setNewTagName(e.target.value)}
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleRenameTag(tag);
+                          if (e.key === 'Escape') setEditingTag(null);
+                        }}
+                      />
+                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleRenameTag(tag)}>
+                        <Edit2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">#{tag}</Badge>
+                      <button 
+                        className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-primary transition-all"
+                        onClick={() => { setEditingTag(tag); setNewTagName(tag); }}
+                      >
+                        <Edit2 className="h-3 w-3" />
+                      </button>
+                      <button 
+                        className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all"
+                        onClick={() => handleDeleteTag(tag)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground italic">Aucun tag pour le moment.</p>
+            )}
           </div>
         </CardContent>
       </Card>

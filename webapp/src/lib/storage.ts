@@ -67,6 +67,35 @@ export const storage = {
     }
   },
 
+  renameTag: (oldName: string, newName: string): void => {
+    if (!newName.trim() || oldName === newName) return;
+    const all = storage.getAllConversations();
+    let changed = false;
+    all.forEach(c => {
+      if (c.tags && c.tags.includes(oldName)) {
+        c.tags = c.tags.map(t => t === oldName ? newName.trim() : t);
+        changed = true;
+      }
+    });
+    if (changed) {
+      localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(all));
+    }
+  },
+
+  deleteTag: (tagName: string): void => {
+    const all = storage.getAllConversations();
+    let changed = false;
+    all.forEach(c => {
+      if (c.tags && c.tags.includes(tagName)) {
+        c.tags = c.tags.filter(t => t !== tagName);
+        changed = true;
+      }
+    });
+    if (changed) {
+      localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(all));
+    }
+  },
+
   moveConversationToFolder: (conversationId: string, folderId: string | undefined): void => {
     const all = storage.getAllConversations();
     const index = all.findIndex(c => c.id === conversationId);
