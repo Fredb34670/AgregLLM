@@ -17,7 +17,8 @@ import {
   Settings,
   ChevronRight,
   ChevronDown,
-  Plus
+  Plus,
+  Edit2
 } from 'lucide-react';
 import { 
   Dialog, 
@@ -47,6 +48,8 @@ export function Sidebar() {
 
   // États pour l'expansion des dossiers
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
+  const [editingFolderName, setEditingFolderName] = useState('');
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -106,6 +109,17 @@ export function Sidebar() {
       newExpanded.add(targetParentId);
       setExpandedFolders(newExpanded);
     }
+  };
+
+  const handleRenameFolder = (id: string) => {
+    if (!editingFolderName.trim()) {
+      setEditingFolderId(null);
+      return;
+    }
+    storage.updateFolder(id, editingFolderName.trim());
+    setEditingFolderId(null);
+    setEditingFolderName('');
+    refreshData();
   };
 
   const handleDeleteFolder = (e: React.MouseEvent, id: string) => {
@@ -210,12 +224,13 @@ export function Sidebar() {
   const FolderItem = ({ node, depth = 0 }: { node: FolderNode, depth?: number }) => {
     const active = isActive('/conversations', node.id);
     const isExpanded = expandedFolders.has(node.id);
+    const isEditing = editingFolderId === node.id;
     const hasChildren = node.children.length > 0;
 
     return (
       <div className="select-none">
         <div className="flex items-center group relative">
-           <Link to={`/conversations?folder=${node.id}`} className="flex-1 min-w-0">
+           <div className="flex-1 min-w-0">
             <div 
               className={`
                 flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors cursor-pointer
@@ -238,27 +253,62 @@ export function Sidebar() {
               </button>
               
               <FolderIcon className={`h-4 w-4 shrink-0 ${active ? 'text-primary fill-primary/20' : ''}`} />
-              <span className="truncate flex-1">{node.name}</span>
+              
+              {isEditing ? (
+                <Input
+                  className="h-6 py-0 px-1 text-xs focus-visible:ring-1"
+                  value={editingFolderName}
+                  onChange={(e) => setEditingFolderName(e.target.value)}
+                  autoFocus
+                  onBlur={() => handleRenameFolder(node.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleRenameFolder(node.id);
+                    if (e.key === 'Escape') {
+                      setEditingFolderId(null);
+                      setEditingFolderName('');
+                    }
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              ) : (
+                <Link to={`/conversations?folder=${node.id}`} className="truncate flex-1">
+                  {node.name}
+                </Link>
+              )}
             </div>
-          </Link>
+          </div>
 
           {/* Actions on hover */}
-          <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm rounded-md shadow-sm border border-border/50 px-1 py-0.5">
-            <button 
-              className="text-muted-foreground hover:text-primary p-1" 
-              title="Créer un sous-dossier"
-              onClick={(e) => { e.preventDefault(); openCreateFolderDialog(node.id); }}
-            >
-              <Plus className="h-3 w-3" />
-            </button>
-            <button 
-              className="text-muted-foreground hover:text-destructive p-1" 
-              title="Supprimer le dossier"
-              onClick={(e) => handleDeleteFolder(e, node.id)}
-            >
-              <Trash2 className="h-3 w-3" />
-            </button>
-          </div>
+          {!isEditing && (
+            <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm rounded-md shadow-sm border border-border/50 px-1 py-0.5">
+              <button 
+                className="text-muted-foreground hover:text-primary p-1" 
+                title="Renommer"
+                onClick={(e) => { 
+                  e.preventDefault(); 
+                  e.stopPropagation();
+                  setEditingFolderId(node.id);
+                  setEditingFolderName(node.name);
+                }}
+              >
+                <Edit2 className="h-3 w-3" />
+              </button>
+              <button 
+                className="text-muted-foreground hover:text-primary p-1" 
+                title="Créer un sous-dossier"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); openCreateFolderDialog(node.id); }}
+              >
+                <Plus className="h-3 w-3" />
+              </button>
+              <button 
+                className="text-muted-foreground hover:text-destructive p-1" 
+                title="Supprimer le dossier"
+                onClick={(e) => handleDeleteFolder(e, node.id)}
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </div>
+          )}
         </div>
 
         <AnimatePresence>
