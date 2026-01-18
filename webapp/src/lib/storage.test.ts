@@ -52,6 +52,18 @@ describe('Storage Service', () => {
     expect(storage.getAllFolders()).toHaveLength(0);
   });
 
+  it('peut gérer les sous-dossiers', () => {
+    const parent = storage.createFolder('Parent');
+    const child = storage.createFolder('Enfant', undefined, parent.id);
+    
+    expect(child.parentId).toBe(parent.id);
+    
+    storage.deleteFolder(parent.id);
+    const orphan = storage.getAllFolders()[0];
+    expect(orphan.name).toBe('Enfant');
+    expect(orphan.parentId).toBeUndefined();
+  });
+
   it('peut déplacer une conversation dans un dossier', () => {
     storage.saveConversation(mockConversation);
     const folder = storage.createFolder('Dossier Test');

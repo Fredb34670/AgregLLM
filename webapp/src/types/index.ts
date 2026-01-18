@@ -7,6 +7,7 @@ export interface Message {
 export interface Folder {
   id: string;
   name: string;
+  parentId?: string; // ID du dossier parent (pour sous-dossiers)
   color?: string; // Code couleur hex ou nom de classe CSS
   createdAt: number;
 }

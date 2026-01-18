@@ -88,11 +88,12 @@ export const storage = {
     }
   },
 
-  createFolder: (name: string, color?: string): Folder => {
+  createFolder: (name: string, color?: string, parentId?: string): Folder => {
     const folders = storage.getAllFolders();
     const newFolder: Folder = {
       id: crypto.randomUUID(),
       name,
+      parentId,
       color,
       createdAt: Date.now()
     };
@@ -104,6 +105,16 @@ export const storage = {
   deleteFolder: (id: string): void => {
     const folders = storage.getAllFolders();
     const filtered = folders.filter(f => f.id !== id);
+    
+    // Mettre à jour les sous-dossiers pour qu'ils remontent à la racine (ou perdent leur parent)
+    let folderChanged = false;
+    filtered.forEach(f => {
+      if (f.parentId === id) {
+        f.parentId = undefined;
+        folderChanged = true;
+      }
+    });
+
     localStorage.setItem(STORAGE_KEY_FOLDERS, JSON.stringify(filtered));
 
     // Déplacer les conversations de ce dossier vers la racine

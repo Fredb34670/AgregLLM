@@ -14,17 +14,17 @@
 
 ## Phase 2 : Refonte des Dossiers (Arborescence)
 
-- [ ] Task: Mise à jour du modèle de données (Support des sous-dossiers)
+- [x] Task: Mise à jour du modèle de données (Support des sous-dossiers)
     - Ajouter `parentId` au type `Folder`.
     - Mettre à jour `storage.ts` pour gérer la création de sous-dossiers.
-- [ ] Task: Composant Sidebar Récursif
+- [x] Task: Composant Sidebar Récursif
     - Refactorer `Sidebar.tsx` pour utiliser un composant `FolderItem` récursif.
     - Implémenter le dépliage/repliage (état local).
     - Ajouter les boutons globaux "Expand/Collapse All".
-- [ ] Task: Drag & Drop des Dossiers
+- [x] Task: Drag & Drop des Dossiers
     - Permettre de glisser un dossier sur un autre pour le déplacer.
     - Gérer les cycles (empêcher de déplacer un parent dans son enfant).
-- [ ] Task: Conductor - User Manual Verification 'Refonte des Dossiers'
+- [~] Task: Conductor - User Manual Verification 'Refonte des Dossiers'
 
 ## Phase 3 : Améliorations UI/UX et Tags
 

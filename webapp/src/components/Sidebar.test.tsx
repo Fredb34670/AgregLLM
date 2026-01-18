@@ -52,7 +52,7 @@ describe('Sidebar', () => {
         <Sidebar />
       </MemoryRouter>
     );
-    const addButton = screen.getByTitle('Créer un dossier');
+    const addButton = screen.getByTitle('Créer un dossier racine');
     fireEvent.click(addButton);
     expect(screen.getByText('Nouveau dossier')).toBeInTheDocument();
   });
