@@ -68,6 +68,26 @@ export function Sidebar() {
     return () => window.removeEventListener('storage', refreshData);
   }, []);
 
+  // Auto-expand when navigating to a folder
+  useEffect(() => {
+    if (currentFolderId) {
+      const newExpanded = new Set(expandedFolders);
+      let targetId: string | undefined = currentFolderId;
+      
+      // On remonte la chaîne des parents pour tout déplier
+      while (targetId) {
+        newExpanded.add(targetId);
+        const folder = folders.find(f => f.id === targetId);
+        targetId = folder?.parentId;
+      }
+      
+      // On ne met à jour que si nécessaire pour éviter des boucles de rendu
+      if (newExpanded.size !== expandedFolders.size) {
+        setExpandedFolders(newExpanded);
+      }
+    }
+  }, [currentFolderId, folders]);
+
   const folderTree = useMemo(() => buildFolderTree(folders), [folders]);
 
   const toggleFolder = (id: string) => {
