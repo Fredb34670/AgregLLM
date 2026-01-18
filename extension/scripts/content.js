@@ -1,6 +1,9 @@
-// content.js - Version Metadonnées Uniquement (Multi-LLM & Générique)
+// content.js - Version Metadonnées Uniquement
+console.log("AgregLLM: Content script chargé sur", window.location.href);
+
 function capture() {
   try {
+    console.log("AgregLLM: Début de la capture...");
     const hostname = window.location.hostname;
     let llmName = "Inconnu";
     let title = document.title;
@@ -86,6 +89,8 @@ function capture() {
     const tagSource = (title + " " + summary).toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, " ").split(/\s+/);
     const suggestedTags = [...new Set(tagSource.filter(word => word.length > 4 && !stopWords.includes(word)))].slice(0, 3);
 
+    console.log("AgregLLM: Capture réussie", title, llmName);
+
     return {
       data: {
         title: title,
@@ -110,10 +115,9 @@ if (typeof browser === "undefined") {
 }
 
 browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  console.log("AgregLLM: Message reçu", msg);
   if (msg.action === "capture") {
     const result = capture();
-    // Feedback minimal ou géré par l'appelant
-    // if (result.data) console.log("AgregLLM : Métadonnées capturées.");
     sendResponse(result);
   }
   return true; // Indique une réponse asynchrone possible (standard)

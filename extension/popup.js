@@ -27,7 +27,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 2. Essayer de communiquer avec le content script (si présent)
     try {
+        console.log("AgregLLM Popup: Envoi demande capture à l'onglet", currentTab.id);
         const response = await browser.tabs.sendMessage(currentTab.id, { action: "capture" });
+        console.log("AgregLLM Popup: Réponse reçue", response);
         if (response && response.data) {
             capturedData = response.data;
             titleInput.value = capturedData.title || currentTab.title;
