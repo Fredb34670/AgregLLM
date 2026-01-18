@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ConversationsList } from './components/ConversationsList';
 import { ConversationDetail } from './components/ConversationDetail';
+import { Settings } from './components/Settings';
+import { storage } from './lib/storage';
+import { Conversation, Folder } from './types';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Sidebar } from './components/Sidebar';
 import { MessageSquare } from 'lucide-react';
@@ -54,6 +57,7 @@ function App() {
         <Route path="/" element={<Welcome />} />
         <Route path="/conversations" element={<ConversationsList />} />
         <Route path="/conversations/:id" element={<ConversationDetail />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </Layout>
   )

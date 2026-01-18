@@ -29,6 +29,7 @@ describe('Sidebar', () => {
       </MemoryRouter>
     );
     expect(screen.getByText('AgregLLM')).toBeInTheDocument();
+    expect(screen.getByText('Paramètres')).toBeInTheDocument();
   });
 
   it('affiche la liste des dossiers', () => {

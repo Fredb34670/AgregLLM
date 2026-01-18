@@ -128,5 +128,55 @@ export const storage = {
       if (color !== undefined) folders[index].color = color;
       localStorage.setItem(STORAGE_KEY_FOLDERS, JSON.stringify(folders));
     }
+  },
+
+  // --- Export ---
+  exportData: (): string => {
+    const data = {
+      version: 1,
+      exportedAt: Date.now(),
+      conversations: storage.getAllConversations(),
+      folders: storage.getAllFolders()
+    };
+    return JSON.stringify(data, null, 2);
+  },
+
+  importData: (json: string): void => {
+    try {
+      const data = JSON.parse(json);
+      if (!data.conversations || !Array.isArray(data.conversations)) {
+        throw new Error("Format invalide : conversations manquantes");
+      }
+      
+      const currentConvs = storage.getAllConversations();
+      const currentFolders = storage.getAllFolders();
+      
+      data.conversations.forEach((newConv: Conversation) => {
+        const index = currentConvs.findIndex(c => c.id === newConv.id);
+        if (index >= 0) {
+          currentConvs[index] = newConv;
+        } else {
+          currentConvs.push(newConv);
+        }
+      });
+      
+      if (data.folders && Array.isArray(data.folders)) {
+        data.folders.forEach((newFolder: Folder) => {
+           const index = currentFolders.findIndex(f => f.id === newFolder.id);
+           if (index >= 0) {
+             currentFolders[index] = newFolder;
+           } else {
+             currentFolders.push(newFolder);
+           }
+        });
+      }
+      
+      localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(currentConvs));
+      localStorage.setItem(STORAGE_KEY_FOLDERS, JSON.stringify(currentFolders));
+      
+    } catch (e) {
+      console.error("Import failed", e);
+      throw e;
+    }
   }
 };

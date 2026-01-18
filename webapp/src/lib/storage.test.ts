@@ -88,4 +88,38 @@ describe('Storage Service', () => {
     const convs = storage.getAllConversations();
     expect(convs).toEqual([]);
   });
+
+  it('peut exporter les données', () => {
+    storage.saveConversation(mockConversation);
+    storage.createFolder('Backup Folder');
+    
+    const json = storage.exportData();
+    const data = JSON.parse(json);
+    
+    expect(data.version).toBe(1);
+    expect(data.conversations).toHaveLength(1);
+    expect(data.conversations[0].title).toBe('Test Conversation');
+    expect(data.folders).toHaveLength(1);
+    expect(data.folders[0].name).toBe('Backup Folder');
+    expect(data.exportedAt).toBeDefined();
+  });
+
+  it('peut importer les données', () => {
+    const backup = {
+      version: 1,
+      exportedAt: Date.now(),
+      conversations: [mockConversation],
+      folders: [{ id: 'f1', name: 'Imported Folder', createdAt: Date.now() }]
+    };
+    
+    storage.importData(JSON.stringify(backup));
+    
+    const allConvs = storage.getAllConversations();
+    expect(allConvs).toHaveLength(1);
+    expect(allConvs[0].title).toBe('Test Conversation');
+    
+    const allFolders = storage.getAllFolders();
+    expect(allFolders).toHaveLength(1);
+    expect(allFolders[0].name).toBe('Imported Folder');
+  });
 });

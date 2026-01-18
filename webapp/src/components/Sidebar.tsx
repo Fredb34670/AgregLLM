@@ -12,7 +12,8 @@ import {
   Trash2, 
   PlusCircle,
   Link as LinkIcon,
-  FileText
+  FileText,
+  Settings
 } from 'lucide-react';
 import { 
   Dialog, 
@@ -191,6 +192,14 @@ export function Sidebar() {
               onDrop={(e) => handleDrop(e, undefined)}
             >
               <MessageSquare className="h-4 w-4" /> Toutes les discussions
+            </Button>
+          </Link>
+          <Link to="/settings">
+            <Button 
+              variant={isActive('/settings') ? 'secondary' : 'ghost'} 
+              className="w-full justify-start gap-3 text-sm h-9"
+            >
+              <Settings className="h-4 w-4" /> Paramètres
             </Button>
           </Link>
         </div>
