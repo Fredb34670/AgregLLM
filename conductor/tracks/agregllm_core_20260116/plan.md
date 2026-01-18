@@ -45,7 +45,7 @@ Cette track vise à implémenter le Produit Minimum Viable (MVP) d'AgregLLM, com
     - [x] Implémenter les options de tri par date et par titre.
 - [x] Task: Conductor - User Manual Verification 'Application Web AgregLLM (Frontend de base)' (Protocol in workflow.md) [d751d8a]
 
-## Phase 3 : Synchronisation Extension & Webapp
+## Phase 3 : Synchronisation Extension & Webapp [checkpoint: 988840c]
 
 - [x] Task: Mécanisme de synchronisation via injection de script [a6f024c]
     - [x] Implémenter le script de synchronisation `sync.js`.
@@ -53,4 +53,4 @@ Cette track vise à implémenter le Produit Minimum Viable (MVP) d'AgregLLM, com
 - [x] Task: Notification temps réel [a6f024c]
     - [x] Implémenter la notification des onglets webapp depuis le background script.
     - [x] Mettre à jour la webapp pour réagir aux événements de synchronisation.
-- [~] Task: Conductor - User Manual Verification 'Synchronisation Extension & Webapp' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Synchronisation Extension & Webapp' (Protocol in workflow.md) [988840c]
