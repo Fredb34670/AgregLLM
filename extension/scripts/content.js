@@ -97,12 +97,17 @@ function capture() {
 
     console.log("AgregLLM: Capture réussie", title, llmName);
 
+    // Tentative d'extraction de date (très basique, à affiner selon les LLM)
+    let displayDate = new Date().toISOString();
+    // Sur ChatGPT, on pourrait chercher des éléments spécifiques, mais new Date() reste le plus sûr
+    // si on ne veut pas casser le script à chaque mise à jour d'interface.
+
     return {
       data: {
         title: title,
         url: window.location.href,
         llm: llmName,
-        date: new Date().toISOString(),
+        date: displayDate,
         summary: summary,
         tags: suggestedTags,
         messages: [] 

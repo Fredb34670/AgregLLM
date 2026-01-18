@@ -80,10 +80,14 @@ function capturePageLogic() {
 document.addEventListener('DOMContentLoaded', async () => {
   const titleInput = document.getElementById('title');
   const llmInput = document.getElementById('llm');
+  const dateInput = document.getElementById('date');
   const summaryInput = document.getElementById('summary');
   const tagsInput = document.getElementById('tags');
   const saveBtn = document.getElementById('save-btn');
   const statusDiv = document.getElementById('status');
+  
+  // Par défaut, date du jour
+  dateInput.value = new Date().toISOString().split('T')[0];
   
   let currentTab = null;
 
@@ -120,14 +124,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         statusDiv.textContent = "Erreur accès page : " + injectionError.message;
     }
 
-    if (extracted && !extracted.error) {
-        titleInput.value = extracted.title || currentTab.title;
-        llmInput.value = extracted.llm || "Web";
-        summaryInput.value = extracted.summary || "";
-        if (extracted.tags) tagsInput.value = extracted.tags.join(', ');
-        
-        statusDiv.textContent = "Données récupérées.";
-        statusDiv.className = "status success";
+            if (extracted && !extracted.error) {
+                titleInput.value = extracted.title || currentTab.title;
+                llmInput.value = extracted.llm || "Web";
+                summaryInput.value = extracted.summary || "";
+                if (extracted.tags) tagsInput.value = extracted.tags.join(', ');
+                if (extracted.date) dateInput.value = extracted.date.split('T')[0];
+                
+                statusDiv.textContent = "Données récupérées.";        statusDiv.className = "status success";
     } else {
         // Fallback ultime si l'injection échoue totalement (ex: page restreinte)
         titleInput.value = currentTab.title;
@@ -150,7 +154,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           llm: llmInput.value,
           summary: summaryInput.value,
           tags: tagsInput.value.split(',').map(t => t.trim()).filter(t => t !== ""),
-          date: new Date().toISOString(),
+          date: new Date(dateInput.value).toISOString(),
           messages: []
       };
 
