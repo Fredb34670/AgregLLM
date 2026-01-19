@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AgregLLM",
-  "version": "1.1.0",
+  "version": "1.1.4",
   "description": "Une extension pour agréger les discussions de vos LLM préférés.",
   "icons": {
     "16": "icon.svg",
@@ -27,7 +27,7 @@
       "js": ["vendor/browser-polyfill.js", "scripts/content.js"]
     },
     {
-      "matches": ["http://localhost/*", "http://127.0.0.1/*"],
+      "matches": ["http://localhost/*", "http://127.0.0.1/*", "https://fredb34670.github.io/AgregLLM/*"],
       "js": ["vendor/browser-polyfill.js", "scripts/sync.js"]
     }
   ],

@@ -88,8 +88,10 @@ async function saveConversation(data) {
         
         await browser.storage.local.set({ conversations: list });
         
-        // Notification Webapp
-        const tabs = await browser.tabs.query({ url: ["*://localhost/*", "*://127.0.0.1/*"] });
+        // Notification Webapp (Local et GitHub Pages)
+        const tabs = await browser.tabs.query({ 
+            url: ["*://localhost/*", "*://127.0.0.1/*", "https://fredb34670.github.io/AgregLLM/*"] 
+        });
         tabs.forEach(t => browser.tabs.sendMessage(t.id, { action: "sync" }).catch(()=>{}));
         
         return true;
