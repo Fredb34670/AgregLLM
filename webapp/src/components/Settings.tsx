@@ -16,27 +16,25 @@ export function Settings() {
   useEffect(() => {
     const checkAuth = () => {
       const auth = gdrive.isAuthenticated();
-      console.log("Settings: Connection status =", auth);
-      setIsConnected(auth);
+      if (auth !== isConnected) {
+        console.log("Settings: Mise à jour statut connexion ->", auth);
+        setIsConnected(auth);
+      }
     };
 
-    gdrive.init().then(() => {
-      checkAuth();
-    });
+    gdrive.init().then(() => checkAuth());
     
-    const handleAuthSuccess = () => {
-      console.log("Settings: Auth success received");
-      checkAuth();
-    };
-
-    window.addEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
-    window.addEventListener('storage', checkAuth);
+    // Événement immédiat
+    window.addEventListener('agregllm-gdrive-auth-success', checkAuth);
+    
+    // Polling de sécurité toutes les secondes
+    const interval = setInterval(checkAuth, 1000);
 
     return () => {
-      window.removeEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
-      window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('agregllm-gdrive-auth-success', checkAuth);
+      clearInterval(interval);
     };
-  }, []);
+  }, [isConnected]);
 
   const handleGDriveLogin = () => gdrive.login();
   const handleGDriveLogout = () => {
