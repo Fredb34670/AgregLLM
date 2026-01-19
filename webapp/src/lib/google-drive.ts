@@ -5,7 +5,6 @@ const SCOPES = "https://www.googleapis.com/auth/drive.appdata";
 
 class GoogleDriveService {
   private tokenClient: any = null;
-  private accessToken: string | null = null;
   private initPromise: Promise<void> | null = null;
 
   async init(): Promise<void> {
@@ -49,7 +48,6 @@ class GoogleDriveService {
           return;
         }
         
-        this.accessToken = response.access_token;
         const expiry = Date.now() + (response.expires_in * 1000);
         
         localStorage.setItem('agregllm_gdrive_token', response.access_token);
@@ -63,13 +61,13 @@ class GoogleDriveService {
   login() {
     if (this.tokenClient) {
       this.tokenClient.requestAccessToken({ prompt: 'consent' });
-    } else {
+    }
+    else {
       this.init().then(() => this.tokenClient?.requestAccessToken({ prompt: 'consent' }));
     }
   }
 
   logout() {
-    this.accessToken = null;
     localStorage.removeItem('agregllm_gdrive_token');
     localStorage.removeItem('agregllm_gdrive_expiry');
     window.dispatchEvent(new CustomEvent('agregllm-gdrive-auth-success'));

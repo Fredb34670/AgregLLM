@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { storage } from "../lib/storage";
 import { gdrive } from "../lib/google-drive";
-import { Download, Upload, Trash2, Edit2, Cloud, CloudOff, RefreshCw, Tag } from "lucide-react";
+import { Trash2, Edit2, Cloud, RefreshCw } from "lucide-react";
 import { useRef, useState, useMemo, useEffect } from "react";
 
 export function Settings() {
