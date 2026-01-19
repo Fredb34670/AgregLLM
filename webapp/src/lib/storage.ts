@@ -58,6 +58,15 @@ export const storage = {
     localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(filtered));
   },
 
+  toggleFavorite: (id: string): void => {
+    const all = storage.getAllConversations();
+    const index = all.findIndex(c => c.id === id);
+    if (index >= 0) {
+      all[index].isFavorite = !all[index].isFavorite;
+      localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(all));
+    }
+  },
+
   updateTags: (id: string, tags: string[]): void => {
     const all = storage.getAllConversations();
     const index = all.findIndex(c => c.id === id);
