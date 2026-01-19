@@ -1,6 +1,6 @@
 // google-drive.ts - Service de synchronisation Cloud via Google Drive API
 
-const CLIENT_ID = "895428232613-4p8st94hs6boa7k2j7ft13dglikdhs0f.apps.googleusercontent.com";
+const CLIENT_ID = "895428232613-4p8st94hs6b0a7k2j7ftl3dglikdhs0f.apps.googleusercontent.com";
 const SCOPES = "https://www.googleapis.com/auth/drive.appdata";
 const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
 
