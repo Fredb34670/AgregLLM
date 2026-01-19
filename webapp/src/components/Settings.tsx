@@ -11,7 +11,7 @@ export function Settings() {
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState("");
   const [isSyncing, setIsSyncing] = useState(false);
-  const [authVersion, setAuthVersion] = useState(0);
+  const [, setAuthVersion] = useState(0);
 
   useEffect(() => {
     gdrive.init().then(() => {
