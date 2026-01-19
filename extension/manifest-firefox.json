@@ -3,6 +3,11 @@
   "name": "AgregLLM",
   "version": "1.1.0",
   "description": "Agrégateur de discussions LLM",
+  "icons": {
+    "16": "icon.svg",
+    "48": "icon.svg",
+    "128": "icon.svg"
+  },
   "permissions": [
     "storage",
     "contextMenus",
