@@ -7,6 +7,7 @@ import { Download, Upload, Trash2, Edit2, Cloud, CloudOff, RefreshCw, Tag } from
 import { useRef, useState, useMemo, useEffect } from "react";
 
 export function Settings() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState("");
   const [isSyncing, setIsSyncing] = useState(false);
