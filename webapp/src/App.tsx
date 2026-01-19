@@ -106,18 +106,25 @@ function Welcome() {
 
 function App() {
   useEffect(() => {
-    // Initialisation silencieuse de GDrive au chargement
-    gdrive.init().then(async () => {
-      if (gdrive.isAuthenticated()) {
-        console.log("AgregLLM: Cloud connected, starting background sync...");
-        const cloudData = await gdrive.loadFromDrive();
-        if (cloudData) {
-          storage.importData(cloudData);
-          // On ne recharge pas brutalement ici pour ne pas couper l'utilisateur
-          // Les données seront à jour au prochain rafraîchissement des composants
+    // Initialisation silencieuse et securisee de GDrive
+    const initCloud = async () => {
+      try {
+        await gdrive.init();
+        if (gdrive.isAuthenticated()) {
+          console.log("AgregLLM: Cloud connected, starting background sync...");
+          const cloudData = await gdrive.loadFromDrive();
+          if (cloudData) {
+            storage.importData(cloudData);
+            // Declencher un evenement pour rafraichir l'UI
+            window.dispatchEvent(new Event('storage'));
+          }
         }
+      } catch (e) {
+        console.error("AgregLLM: GDrive init failed", e);
       }
-    });
+    };
+    
+    initCloud();
   }, []);
 
   return (
