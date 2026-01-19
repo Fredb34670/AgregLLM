@@ -210,14 +210,14 @@ export function ConversationsList() {
                               {conv.title}
                             </CardTitle>
                           </div>
-                          <Badge variant="outline" className="ml-2 bg-primary/5 text-primary/70 border-primary/10 shrink-0">
+                          <Badge variant="outline" className="ml-2 bg-primary/5 text-primary/80 border-primary/20 shrink-0 text-xs px-2 py-0">
                             {conv.llm}
                           </Badge>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-3 shrink-0">
-                        <p className="text-[10px] text-muted-foreground/60 font-medium whitespace-nowrap">
+                      <div className="flex items-center gap-3 shrink-0 mr-8">
+                        <p className="text-xs text-muted-foreground font-semibold whitespace-nowrap">
                           {new Date(conv.date || conv.capturedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
                       </div>
@@ -250,11 +250,11 @@ export function ConversationsList() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8"
+                  className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 w-9"
                   onClick={(e) => handleDelete(e, conv)}
                   title="Supprimer la discussion"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-5 w-5" />
                 </Button>
               </motion.div>
             )) 
