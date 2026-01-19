@@ -11,24 +11,37 @@ export function Settings() {
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState("");
   const [isSyncing, setIsSyncing] = useState(false);
-  const [, setAuthVersion] = useState(0);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    const checkAuth = () => {
+      const auth = gdrive.isAuthenticated();
+      console.log("Settings: Connection status =", auth);
+      setIsConnected(auth);
+    };
+
     gdrive.init().then(() => {
-      setAuthVersion(v => v + 1);
+      checkAuth();
     });
     
     const handleAuthSuccess = () => {
-      console.log("Settings: Auth success event received");
-      setAuthVersion(v => v + 1);
+      console.log("Settings: Auth success received");
+      checkAuth();
     };
+
     window.addEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
-    return () => window.removeEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
+    window.addEventListener('storage', checkAuth);
+
+    return () => {
+      window.removeEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
+      window.removeEventListener('storage', checkAuth);
+    };
   }, []);
 
   const handleGDriveLogin = () => gdrive.login();
   const handleGDriveLogout = () => {
     gdrive.logout();
+    setIsConnected(false);
     window.location.reload();
   };
 
@@ -44,6 +57,7 @@ export function Settings() {
       alert('Synchronisation terminée !');
       window.location.reload();
     } catch (e) {
+      console.error("Sync Error", e);
       alert('Erreur de synchronisation');
     } finally {
       setIsSyncing(false);
@@ -131,7 +145,7 @@ export function Settings() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!gdrive.isAuthenticated() ? (
+          {!isConnected ? (
             <div className="flex items-center justify-between border border-dashed border-primary/30 p-4 rounded-lg bg-background/50">
               <div className="space-y-0.5">
                 <div className="font-medium text-sm">Connexion requise</div>
@@ -215,7 +229,7 @@ export function Settings() {
                     {editingTag === tag ? (
                       <div className="flex items-center gap-1">
                         <Input 
-                          className="h-6 w-24 text-[10px]" 
+                          className="h-6 w-24 text-[10px]"
                           value={newTagName} 
                           onChange={(e) => setNewTagName(e.target.value)}
                           autoFocus
