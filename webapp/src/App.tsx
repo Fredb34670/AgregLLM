@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ConversationsList } from './components/ConversationsList';
 import { Settings } from './components/Settings';
 import { storage } from './lib/storage';
+import { gdrive } from './lib/google-drive';
 import { Conversation, Folder } from './types';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Sidebar } from './components/Sidebar';
@@ -104,6 +105,21 @@ function Welcome() {
 }
 
 function App() {
+  useEffect(() => {
+    // Initialisation silencieuse de GDrive au chargement
+    gdrive.init().then(async () => {
+      if (gdrive.isAuthenticated()) {
+        console.log("AgregLLM: Cloud connected, starting background sync...");
+        const cloudData = await gdrive.loadFromDrive();
+        if (cloudData) {
+          storage.importData(cloudData);
+          // On ne recharge pas brutalement ici pour ne pas couper l'utilisateur
+          // Les données seront à jour au prochain rafraîchissement des composants
+        }
+      }
+    });
+  }, []);
+
   return (
     <Layout>
       <Routes>

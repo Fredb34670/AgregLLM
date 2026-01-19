@@ -1,15 +1,47 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { storage } from "../lib/storage";
-import { Download, Upload, Tag, Trash2, Edit2 } from "lucide-react";
-import { useRef, useState, useMemo } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { gdrive } from "../lib/google-drive";
+import { Download, Upload, Tag, Trash2, Edit2, Cloud, CloudOff, RefreshCw } from "lucide-react";
+import { useRef, useState, useMemo, useEffect } from "react";
 
 export function Settings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState("");
+  const [isGDriveInit, setIsGDriveInit] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  useEffect(() => {
+    gdrive.init().then(() => setIsGDriveInit(true));
+    
+    const handleAuthSuccess = () => setIsGDriveInit(true);
+    window.addEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
+    return () => window.removeEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
+  }, []);
+
+  const handleGDriveLogin = () => gdrive.login();
+  const handleGDriveLogout = () => {
+    gdrive.logout();
+    setIsGDriveInit(false);
+    window.location.reload();
+  };
+
+  const handleSyncNow = async () => {
+    setIsSyncing(true);
+    // 1. Charger depuis le Cloud
+    const cloudData = await gdrive.loadFromDrive();
+    if (cloudData) {
+      storage.importData(cloudData);
+    }
+    // 2. Envoyer le local fusionné vers le Cloud
+    const localData = storage.exportData();
+    await gdrive.syncToDrive(localData);
+    
+    setIsSyncing(false);
+    alert('Synchronisation terminée !');
+    window.location.reload();
+  };
 
   const conversations = storage.getAllConversations();
   
@@ -81,6 +113,54 @@ export function Settings() {
           Gérez vos préférences et vos données.
         </p>
       </div>
+
+      <Card className="border-primary/20 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-primary">
+            <Cloud className="h-5 w-5" /> Synchronisation Cloud
+          </CardTitle>
+          <CardDescription>
+            Synchronisez vos conversations sur tous vos appareils via Google Drive (gratuit et privé).
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!gdrive.isAuthenticated() ? (
+            <div className="flex items-center justify-between border border-dashed border-primary/30 p-4 rounded-lg bg-background/50">
+              <div className="space-y-0.5">
+                <div className="font-medium">Connecter Google Drive</div>
+                <div className="text-sm text-muted-foreground">
+                  Activez la synchronisation automatique.
+                </div>
+              </div>
+              <Button onClick={handleGDriveLogin} className="gap-2 bg-primary">
+                Se connecter
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border p-4 rounded-lg bg-background/50">
+                <div className="space-y-0.5">
+                  <div className="font-medium text-success flex items-center gap-2">
+                    <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" /> 
+                    Cloud Connecté
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Vos données sont sécurisées sur votre Drive.
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={handleSyncNow} disabled={isSyncing} variant="outline" className="gap-2">
+                    <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} /> Sync. maintenant
+                  </Button>
+                  <Button onClick={handleGDriveLogout} variant="ghost" size="icon" title="Déconnexion" className="text-muted-foreground hover:text-destructive">
+                    <CloudOff className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
