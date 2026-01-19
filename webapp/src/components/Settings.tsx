@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { storage } from "../lib/storage";
 import { gdrive } from "../lib/google-drive";
-import { Download, Upload, Trash2, Edit2, Cloud, CloudOff, RefreshCw } from "lucide-react";
+import { Download, Upload, Trash2, Edit2, Cloud, CloudOff, RefreshCw, Tag } from "lucide-react";
 import { useRef, useState, useMemo, useEffect } from "react";
 
 export function Settings() {
@@ -112,26 +111,26 @@ export function Settings() {
       <div className="space-y-1">
         <h2 className="text-3xl font-bold tracking-tight">Paramètres</h2>
         <p className="text-muted-foreground">
-          Gérez vos préférences et vos données.
+          Gérez votre Cloud, vos tags et vos sauvegardes locales.
         </p>
       </div>
 
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-primary">
-            <Cloud className="h-5 w-5" /> Synchronisation Cloud
+            <Cloud className="h-5 w-5" /> Synchronisation Cloud (Google Drive)
           </CardTitle>
           <CardDescription>
-            Synchronisez vos conversations sur tous vos appareils via Google Drive (gratuit et privé).
+            Accédez à vos données sur tous vos appareils. Les données sont stockées de façon privée sur votre espace personnel.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {!gdrive.isAuthenticated() ? (
             <div className="flex items-center justify-between border border-dashed border-primary/30 p-4 rounded-lg bg-background/50">
               <div className="space-y-0.5">
-                <div className="font-medium">Connecter Google Drive</div>
-                <div className="text-sm text-muted-foreground">
-                  Activez la synchronisation automatique.
+                <div className="font-medium text-sm">Connexion requise</div>
+                <div className="text-xs text-muted-foreground">
+                  Liez votre compte Google pour activer la synchronisation.
                 </div>
               </div>
               <Button onClick={handleGDriveLogin} className="gap-2 bg-primary">
@@ -146,15 +145,15 @@ export function Settings() {
                     <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" /> 
                     Cloud Connecté
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    Vos données sont sécurisées sur votre Drive.
+                  <div className="text-xs text-muted-foreground">
+                    Synchronisation active avec votre Drive personnel.
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={handleSyncNow} disabled={isSyncing} variant="outline" className="gap-2">
-                    <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} /> Sync. maintenant
+                  <Button onClick={handleSyncNow} disabled={isSyncing} variant="outline" size="sm" className="gap-2">
+                    <RefreshCw className={`h-3 w-3 ${isSyncing ? 'animate-spin' : ''}`} /> Synchroniser
                   </Button>
-                  <Button onClick={handleGDriveLogout} variant="ghost" size="icon" title="Déconnexion" className="text-muted-foreground hover:text-destructive">
+                  <Button onClick={handleGDriveLogout} variant="ghost" size="icon" title="Déconnexion" className="h-8 w-8 text-muted-foreground hover:text-destructive">
                     <CloudOff className="h-4 w-4" />
                   </Button>
                 </div>
@@ -164,100 +163,88 @@ export function Settings() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Sauvegarde et Restauration</CardTitle>
-          <CardDescription>
-            Exportez vos données pour les mettre en sécurité ou les transférer.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between border p-4 rounded-lg">
-            <div className="space-y-0.5">
-              <div className="font-medium">Exporter les données</div>
-              <div className="text-sm text-muted-foreground">
-                Télécharge un fichier JSON contenant toutes vos conversations et dossiers.
-              </div>
-            </div>
-            <Button onClick={handleExport} variant="outline" className="gap-2">
-              <Download className="h-4 w-4" /> Exporter
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Download className="h-4 w-4" /> Sauvegarde locale (JSON)
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Indispensable pour garder une copie physique de vos données hors Google.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button onClick={handleExport} variant="outline" className="w-full justify-start gap-2 text-xs">
+              <Download className="h-3.5 w-3.5" /> Exporter le fichier .json
             </Button>
-          </div>
-
-          <div className="flex items-center justify-between border p-4 rounded-lg">
-            <div className="space-y-0.5">
-              <div className="font-medium">Importer des données</div>
-              <div className="text-sm text-muted-foreground">
-                Restaure une sauvegarde depuis un fichier JSON. Attention, cela fusionnera avec les données actuelles.
-              </div>
+            <div className="relative">
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept=".json" 
+                onChange={handleFileChange}
+              />
+              <Button onClick={handleImportClick} variant="ghost" className="w-full justify-start gap-2 text-xs text-muted-foreground hover:text-foreground">
+                <Upload className="h-3.5 w-3.5" /> Importer une sauvegarde
+              </Button>
             </div>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
-              accept=".json" 
-              onChange={handleFileChange}
-            />
-            <Button onClick={handleImportClick} variant="outline" className="gap-2">
-              <Upload className="h-4 w-4" /> Importer
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Gestion des Tags</CardTitle>
-          <CardDescription>
-            Renommez ou supprimez vos tags globalement.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {allTags.length > 0 ? (
-              allTags.map(tag => (
-                <div key={tag} className="flex items-center gap-1 bg-muted/50 p-1 rounded-md border border-border/50 group">
-                  {editingTag === tag ? (
-                    <div className="flex items-center gap-1">
-                      <Input 
-                        className="h-7 w-32 text-xs" 
-                        value={newTagName} 
-                        onChange={(e) => setNewTagName(e.target.value)}
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleRenameTag(tag);
-                          if (e.key === 'Escape') setEditingTag(null);
-                        }}
-                      />
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleRenameTag(tag)}>
-                        <Edit2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">#{tag}</Badge>
-                      <button 
-                        className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-primary transition-all"
-                        onClick={() => { setEditingTag(tag); setNewTagName(tag); }}
-                      >
-                        <Edit2 className="h-3 w-3" />
-                      </button>
-                      <button 
-                        className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all"
-                        onClick={() => handleDeleteTag(tag)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    </>
-                  )}
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground italic">Aucun tag pour le moment.</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Tag className="h-4 w-4" /> Gestion des Tags
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Renommez ou supprimez vos tags globalement.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-1.5">
+              {allTags.length > 0 ? (
+                allTags.map(tag => (
+                  <div key={tag} className="flex items-center gap-1 bg-muted/50 p-1 rounded-md border border-border/50 group">
+                    {editingTag === tag ? (
+                      <div className="flex items-center gap-1">
+                        <Input 
+                          className="h-6 w-24 text-[10px]" 
+                          value={newTagName} 
+                          onChange={(e) => setNewTagName(e.target.value)}
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleRenameTag(tag);
+                            if (e.key === 'Escape') setEditingTag(null);
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <span className="text-[10px] font-medium px-1">#{tag}</span>
+                        <button 
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-all"
+                          onClick={() => { setEditingTag(tag); setNewTagName(tag); }}
+                        >
+                          <Edit2 className="h-2.5 w-2.5" />
+                        </button>
+                        <button 
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                          onClick={() => handleDeleteTag(tag)}
+                        >
+                          <Trash2 className="h-2.5 w-2.5" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-muted-foreground italic">Aucun tag.</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

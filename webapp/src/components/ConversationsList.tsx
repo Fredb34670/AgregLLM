@@ -88,7 +88,8 @@ import {
       })
       .sort((a, b) => {
         if (sortBy === 'date') {
-          return b.capturedAt - a.capturedAt;
+          // Tri par date de discussion (ISO string)
+          return new Date(b.date || b.capturedAt).getTime() - new Date(a.date || a.capturedAt).getTime();
         } else {
           return a.title.localeCompare(b.title);
         }

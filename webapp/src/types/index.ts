@@ -18,6 +18,7 @@ export interface Conversation {
   url: string;
   llm: string;
   capturedAt: number;
+  date?: string; // Date réelle de la discussion (ISO)
   messages: Message[];
   summary?: string;
   tags?: string[];
