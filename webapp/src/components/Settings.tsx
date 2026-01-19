@@ -62,9 +62,17 @@ export function Settings() {
         </CardHeader>
         <CardContent>
           {!isConnected ? (
-            <div className="flex items-center justify-between p-2">
-              <p className="text-sm">Connectez votre compte pour synchroniser vos appareils.</p>
-              <Button onClick={() => gdrive.login()}>Se connecter</Button>
+            <div className="space-y-4 p-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm">Connectez votre compte pour synchroniser vos appareils.</p>
+                <Button onClick={() => gdrive.login()}>Se connecter</Button>
+              </div>
+              <div className="text-[11px] bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 p-3 rounded-md text-amber-800 dark:text-amber-200 leading-relaxed shadow-sm">
+                <strong>💡 Note sur la sécurité :</strong> AgregLLM est un projet indépendant et gratuit. 
+                Google affichera un message indiquant que l'application n'a pas été validée. 
+                C'est normal : pour continuer, cliquez sur <em>"Paramètres avancés"</em> puis sur <em>"Accéder à AgregLLM (non sécurisé)"</em>. 
+                C'est justement la preuve que vos données ne transitent par aucun serveur tiers et restent sur <strong>votre</strong> Drive.
+              </div>
             </div>
           ) : (
             <div className="flex items-center justify-between p-2">
