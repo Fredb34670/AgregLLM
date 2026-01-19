@@ -194,19 +194,19 @@ export function ConversationsList() {
                 onDragStart={(e) => handleDragStart(e, conv.id)}
               >
                 <a href={conv.url} target="_blank" rel="noopener noreferrer" className="block">
-                  <Card className="hover:ring-1 hover:ring-primary/20 hover:bg-muted/30 transition-all pr-12 overflow-hidden border-none shadow-sm bg-card/50 cursor-grab active:cursor-grabbing">
-                    <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 gap-4">
+                  <Card className="group/card relative hover:ring-2 hover:ring-primary/20 transition-all border border-border/60 shadow-sm hover:shadow-md bg-card cursor-grab active:cursor-grabbing mb-4 overflow-hidden">
+                    <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3 gap-4">
                       <div className="flex flex-col gap-1 overflow-hidden flex-1">
                         <div className="flex items-center justify-between w-full">
                           <div className="flex items-center gap-3 overflow-hidden">
                             <button 
                               onClick={(e) => handleToggleFavorite(e, conv.id)}
-                              className={`shrink-0 transition-all ${conv.isFavorite ? 'text-amber-500 scale-110' : 'text-muted-foreground/20 hover:text-amber-500/50'}`}
+                              className={`shrink-0 transition-all p-1 rounded-full hover:bg-amber-500/10 ${conv.isFavorite ? 'text-amber-500 scale-110' : 'text-muted-foreground/30 hover:text-amber-500/50'}`}
                               title={conv.isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
                             >
                               <Star className={`h-5 w-5 ${conv.isFavorite ? 'fill-current' : ''}`} />
                             </button>
-                            <CardTitle className="text-lg font-bold truncate group-hover:text-primary transition-colors">
+                            <CardTitle className="text-lg font-bold truncate group-hover/card:text-primary transition-colors">
                               {conv.title}
                             </CardTitle>
                           </div>
@@ -250,7 +250,7 @@ export function ConversationsList() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8"
                   onClick={(e) => handleDelete(e, conv)}
                   title="Supprimer la discussion"
                 >
