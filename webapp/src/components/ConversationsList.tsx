@@ -99,15 +99,6 @@ import {
       {/* Header et Filtres */}
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Link to="/conversations" className="hover:text-primary transition-colors">Discussions</Link>
-            {currentFolder && (
-              <>
-                <ChevronRight className="h-4 w-4" />
-                <span className="text-foreground font-medium">{currentFolder.name}</span>
-              </>
-            )}
-          </div>
           <h2 className="text-3xl font-bold tracking-tight">
             {currentFolder ? currentFolder.name : "Toutes les discussions"}
           </h2>
