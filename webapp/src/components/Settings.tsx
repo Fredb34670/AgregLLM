@@ -10,11 +10,18 @@ export function Settings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState("");
-  const [, setIsGDriveInit] = useState(false);
+  const [isGDriveInit, setIsGDriveInit] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
-    gdrive.init().then(() => setIsGDriveInit(true));
+    // Verifier le statut au montage du composant
+    if (gdrive.isAuthenticated()) {
+      setIsGDriveInit(true);
+    }
+
+    gdrive.init().then(() => {
+      setIsGDriveInit(gdrive.isAuthenticated());
+    });
     
     const handleAuthSuccess = () => setIsGDriveInit(true);
     window.addEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
@@ -125,7 +132,7 @@ export function Settings() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!gdrive.isAuthenticated() ? (
+          {!isGDriveInit && !gdrive.isAuthenticated() ? (
             <div className="flex items-center justify-between border border-dashed border-primary/30 p-4 rounded-lg bg-background/50">
               <div className="space-y-0.5">
                 <div className="font-medium text-sm">Connexion requise</div>
