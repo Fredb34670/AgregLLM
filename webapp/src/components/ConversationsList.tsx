@@ -195,28 +195,24 @@ export function ConversationsList() {
               >
                 <a href={conv.url} target="_blank" rel="noopener noreferrer" className="block">
                   <Card className="group/card relative hover:ring-2 hover:ring-primary/20 transition-all border border-border/60 shadow-sm hover:shadow-md bg-card cursor-grab active:cursor-grabbing mb-4 overflow-hidden">
-                    <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3 gap-4">
-                      <div className="flex flex-col gap-1 overflow-hidden flex-1">
-                        <div className="flex items-center justify-between w-full">
-                          <div className="flex items-center gap-3 overflow-hidden">
-                            <button 
-                              onClick={(e) => handleToggleFavorite(e, conv.id)}
-                              className={`shrink-0 transition-all p-1 rounded-full hover:bg-amber-500/10 ${conv.isFavorite ? 'text-amber-500 scale-110' : 'text-muted-foreground/30 hover:text-amber-500/50'}`}
-                              title={conv.isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
-                            >
-                              <Star className={`h-5 w-5 ${conv.isFavorite ? 'fill-current' : ''}`} />
-                            </button>
-                            <CardTitle className="text-lg font-bold truncate group-hover/card:text-primary transition-colors">
-                              {conv.title}
-                            </CardTitle>
-                          </div>
-                          <Badge variant="outline" className="ml-2 bg-primary/5 text-primary/80 border-primary/20 shrink-0 text-xs px-2 py-0">
-                            {conv.llm}
-                          </Badge>
-                        </div>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 gap-4">
+                      <div className="flex flex-row items-center gap-3 overflow-hidden flex-1">
+                        <button 
+                          onClick={(e) => handleToggleFavorite(e, conv.id)}
+                          className={`shrink-0 transition-all p-1 rounded-full hover:bg-amber-500/10 ${conv.isFavorite ? 'text-amber-500 scale-110' : 'text-muted-foreground/30 hover:text-amber-500/50'}`}
+                          title={conv.isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+                        >
+                          <Star className={`h-5 w-5 ${conv.isFavorite ? 'fill-current' : ''}`} />
+                        </button>
+                        <CardTitle className="text-lg font-bold truncate group-hover/card:text-primary transition-colors">
+                          {conv.title}
+                        </CardTitle>
+                        <Badge variant="outline" className="bg-primary/5 text-primary/80 border-primary/20 shrink-0 text-[10px] px-2 py-0 h-5">
+                          {conv.llm}
+                        </Badge>
                       </div>
                       
-                      <div className="flex items-center gap-3 shrink-0 mr-8">
+                      <div className="flex items-center gap-3 shrink-0 mr-10">
                         <p className="text-xs text-muted-foreground font-semibold whitespace-nowrap">
                           {new Date(conv.date || conv.capturedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
