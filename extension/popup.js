@@ -109,7 +109,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const llmInput = document.getElementById('llm');
   const dateInput = document.getElementById('date');
   const dateWrapper = document.getElementById('date-wrapper');
-  const summaryInput = document.getElementById('summary');
+  const saveBtn = document.getElementById('save-btn');
+  const openAppBtn = document.getElementById('open-app-btn');
+  const statusDiv = document.getElementById('status');
+
+  // Ouvrir l'application
+  openAppBtn.addEventListener('click', () => {
+    browser.tabs.create({ url: "https://fredb34670.github.io/AgregLLM/" });
+  });
   
   // Par défaut, date du jour
   dateInput.value = new Date().toISOString().split('T')[0];
