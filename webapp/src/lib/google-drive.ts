@@ -1,4 +1,4 @@
-// google-drive.ts - Service de synchronisation Cloud (V6 Correctif)
+// google-drive.ts - Service de synchronisation Cloud (V7 Correction Init)
 
 const CLIENT_ID = "895428232613-4p8st94hs6b0a7k2j7ftl3dglikdhs0f.apps.googleusercontent.com";
 const SCOPES = "https://www.googleapis.com/auth/drive.appdata";
@@ -12,22 +12,28 @@ class GoogleDriveService {
     if (this.initPromise) return this.initPromise;
 
     this.initPromise = new Promise<void>((resolve) => {
-      console.log("AgregLLM GDrive: Initialisation V6...");
+      console.log("AgregLLM GDrive: Initialisation V7...");
       
-      if (document.getElementById('gdrive-gis-script')) {
-        this.setupTokenClient();
-        resolve();
+      const scriptId = 'gdrive-gis-script';
+      if (document.getElementById(scriptId)) {
+        this.waitForGoogle(() => {
+          this.setupTokenClient();
+          resolve();
+        });
         return;
       }
 
       const script = document.createElement('script');
-      script.id = 'gdrive-gis-script';
+      script.id = scriptId;
       script.src = "https://accounts.google.com/gsi/client";
       script.async = true;
       script.defer = true;
       script.onload = () => {
-        this.setupTokenClient();
-        resolve();
+        console.log("AgregLLM GDrive: Script chargé");
+        this.waitForGoogle(() => {
+          this.setupTokenClient();
+          resolve();
+        });
       };
       document.body.appendChild(script);
     });
@@ -35,43 +41,46 @@ class GoogleDriveService {
     return this.initPromise;
   }
 
-  private setupTokenClient() {
-    if (!(window as any).google?.accounts?.oauth2) {
-      setTimeout(() => this.setupTokenClient(), 200);
-      return;
+  private waitForGoogle(callback: () => void) {
+    if ((window as any).google?.accounts?.oauth2) {
+      callback();
+    } else {
+      setTimeout(() => this.waitForGoogle(callback), 100);
     }
+  }
+
+  private setupTokenClient() {
+    if (this.tokenClient) return;
 
     this.tokenClient = (window as any).google.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
       scope: SCOPES,
       callback: (response: any) => {
-        console.log("AgregLLM GDrive: Réponse reçue de Google", response);
-        
+        console.log("AgregLLM GDrive: Callback reçu", response);
         if (response.error !== undefined) {
-          console.error("AgregLLM GDrive: Erreur", response.error);
+          console.error("GDrive Error:", response.error);
           return;
         }
         
         this.accessToken = response.access_token;
-        // Google donne expires_in en secondes (souvent 3600). Par sécurité on met 3500.
-        const expiresInSeconds = response.expires_in || 3600;
-        const expiry = Date.now() + (expiresInSeconds * 1000);
-        
+        const expiry = Date.now() + (response.expires_in * 1000);
         localStorage.setItem('agregllm_gdrive_token', response.access_token);
         localStorage.setItem('agregllm_gdrive_expiry', expiry.toString());
         
-        console.log("AgregLLM GDrive: Connexion réussie ! Token stocké.");
+        console.log("AgregLLM GDrive: Authentification réussie");
         window.dispatchEvent(new CustomEvent('agregllm-gdrive-auth-success'));
       },
     });
+    console.log("AgregLLM GDrive: Client configuré");
   }
 
   login() {
-    if (this.tokenClient) {
-      this.tokenClient.requestAccessToken({ prompt: 'consent' });
-    } else {
+    if (!this.tokenClient) {
+      console.error("AgregLLM GDrive: Client non prêt");
       this.init().then(() => this.tokenClient?.requestAccessToken({ prompt: 'consent' }));
+      return;
     }
+    this.tokenClient.requestAccessToken({ prompt: 'consent' });
   }
 
   logout() {
@@ -84,14 +93,9 @@ class GoogleDriveService {
   isAuthenticated(): boolean {
     const token = localStorage.getItem('agregllm_gdrive_token');
     const expiry = localStorage.getItem('agregllm_gdrive_expiry');
-    
-    if (!token) return false;
-    if (!expiry || expiry === "NaN") return true; // Si pas d'expiration, on tente quand même
-    
-    return Date.now() < parseInt(expiry);
+    return !!token && !!expiry && Date.now() < parseInt(expiry);
   }
 
-  // ... (reste des méthodes sync/load inchangées)
   async syncToDrive(data: string): Promise<boolean> {
     const token = localStorage.getItem('agregllm_gdrive_token');
     if (!token) return false;
