@@ -11,7 +11,7 @@ seedData();
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="system" storageKey="agregllm-theme">
-      <BrowserRouter>
+      <BrowserRouter basename="/AgregLLM">
         <App />
       </BrowserRouter>
     </ThemeProvider>
