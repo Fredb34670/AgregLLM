@@ -7,23 +7,15 @@ import { Download, Upload, Trash2, Edit2, Cloud, CloudOff, RefreshCw, Tag } from
 import { useRef, useState, useMemo, useEffect } from "react";
 
 export function Settings() {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState("");
-  const [isGDriveInit, setIsGDriveInit] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    // Verifier le statut au montage du composant
-    if (gdrive.isAuthenticated()) {
-      setIsGDriveInit(true);
-    }
-
-    gdrive.init().then(() => {
-      setIsGDriveInit(gdrive.isAuthenticated());
-    });
+    gdrive.init();
     
-    const handleAuthSuccess = () => setIsGDriveInit(true);
+    const handleAuthSuccess = () => setRefreshTrigger(prev => prev + 1);
     window.addEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
     return () => window.removeEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
   }, []);
@@ -31,24 +23,25 @@ export function Settings() {
   const handleGDriveLogin = () => gdrive.login();
   const handleGDriveLogout = () => {
     gdrive.logout();
-    setIsGDriveInit(false);
     window.location.reload();
   };
 
   const handleSyncNow = async () => {
     setIsSyncing(true);
-    // 1. Charger depuis le Cloud
-    const cloudData = await gdrive.loadFromDrive();
-    if (cloudData) {
-      storage.importData(cloudData);
+    try {
+      const cloudData = await gdrive.loadFromDrive();
+      if (cloudData) {
+        storage.importData(cloudData);
+      }
+      const localData = storage.exportData();
+      await gdrive.syncToDrive(localData);
+      alert('Synchronisation terminée !');
+      window.location.reload();
+    } catch (e) {
+      alert('Erreur de synchronisation');
+    } finally {
+      setIsSyncing(false);
     }
-    // 2. Envoyer le local fusionné vers le Cloud
-    const localData = storage.exportData();
-    await gdrive.syncToDrive(localData);
-    
-    setIsSyncing(false);
-    alert('Synchronisation terminée !');
-    window.location.reload();
   };
 
   const conversations = storage.getAllConversations();
@@ -132,7 +125,7 @@ export function Settings() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!isGDriveInit && !gdrive.isAuthenticated() ? (
+          {!gdrive.isAuthenticated() ? (
             <div className="flex items-center justify-between border border-dashed border-primary/30 p-4 rounded-lg bg-background/50">
               <div className="space-y-0.5">
                 <div className="font-medium text-sm">Connexion requise</div>
