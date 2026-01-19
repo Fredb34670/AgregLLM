@@ -73,7 +73,6 @@ function capturePageLogic() {
             } else {
                 llmName = hostname;
             }
-            // On cherche un titre de niveau 1 ou l'élément le plus probable pour un titre de discussion
             const h1 = document.querySelector('h1');
             if (h1) title = h1.innerText;
         }
@@ -84,7 +83,6 @@ function capturePageLogic() {
             summary = summary.trim().substring(0, 300);
             if (summary.length === 300) summary += "...";
         } else {
-            // Fallback résumé brutal si rien trouvé
             summary = document.body.innerText.substring(0, 300).replace(/\s+/g, ' ').trim() + "...";
         }
 
@@ -109,30 +107,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   const llmInput = document.getElementById('llm');
   const dateInput = document.getElementById('date');
   const dateWrapper = document.getElementById('date-wrapper');
+  const summaryInput = document.getElementById('summary');
+  const tagsInput = document.getElementById('tags');
   const saveBtn = document.getElementById('save-btn');
   const openAppBtn = document.getElementById('open-app-btn');
   const statusDiv = document.getElementById('status');
 
   // Ouvrir l'application
-  openAppBtn.addEventListener('click', () => {
-    browser.tabs.create({ url: "https://fredb34670.github.io/AgregLLM/" });
-  });
+  if (openAppBtn) {
+    openAppBtn.addEventListener('click', () => {
+      browser.tabs.create({ url: "https://fredb34670.github.io/AgregLLM/" });
+    });
+  }
   
   // Par défaut, date du jour
-  dateInput.value = new Date().toISOString().split('T')[0];
+  if (dateInput) {
+    dateInput.value = new Date().toISOString().split('T')[0];
+  }
 
   // Ouvrir le calendrier au clic sur le champ ou l'icône
-  dateWrapper.addEventListener('click', () => {
-    try {
-      if (dateInput.showPicker) {
-        dateInput.showPicker();
-      } else {
+  if (dateWrapper && dateInput) {
+    dateWrapper.addEventListener('click', () => {
+      try {
+        if (dateInput.showPicker) {
+          dateInput.showPicker();
+        } else {
+          dateInput.focus();
+        }
+      } catch (e) {
         dateInput.focus();
       }
-    } catch (e) {
-      dateInput.focus();
-    }
-  });
+    });
+  }
   
   let currentTab = null;
 
@@ -151,47 +157,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     try {
         if (browser.scripting && browser.scripting.executeScript) {
-            // V3 (Chrome)
-            console.log("AgregLLM: Utilisation de browser.scripting");
             const results = await browser.scripting.executeScript({
                 target: { tabId: currentTab.id },
                 func: capturePageLogic
             });
-            console.log("AgregLLM: Résultats V3", results);
             if (results && results[0] && results[0].result) extracted = results[0].result;
         } else if (browser.tabs.executeScript) {
-            // V2 (Firefox)
-            console.log("AgregLLM: Utilisation de browser.tabs.executeScript");
             const code = `(${capturePageLogic.toString()})();`;
             const results = await browser.tabs.executeScript(currentTab.id, { code });
-            console.log("AgregLLM: Résultats V2", results);
             if (results && results[0]) extracted = results[0];
         }
     } catch (injectionError) {
         console.error("Erreur injection:", injectionError);
-        statusDiv.textContent = "Erreur injection : " + injectionError.message;
     }
 
     if (extracted) {
-        if (extracted.error) {
-            console.error("Erreur logique capture:", extracted.error);
-            statusDiv.textContent = "Erreur capture : " + extracted.error;
-        }
+        if (extracted.error) console.error("Erreur capture:", extracted.error);
         
-        titleInput.value = extracted.title || currentTab.title;
-        llmInput.value = extracted.llm || "Web";
-        summaryInput.value = extracted.summary || "";
-        if (extracted.tags) tagsInput.value = extracted.tags.join(', ');
-        if (extracted.date) dateInput.value = extracted.date.split('T')[0];
+        if (titleInput) titleInput.value = extracted.title || currentTab.title;
+        if (llmInput) llmInput.value = extracted.llm || "Web";
+        if (summaryInput) summaryInput.value = extracted.summary || "";
+        if (tagsInput && extracted.tags) tagsInput.value = extracted.tags.join(', ');
         
         statusDiv.textContent = "Données récupérées.";
         statusDiv.className = "status success";
     } else {
-        // Fallback ultime si l'injection ne renvoie rien
-        console.log("AgregLLM: Aucune donnée extraite, utilisation du fallback.");
-        titleInput.value = currentTab.title;
-        llmInput.value = detectLLM(currentTab.url);
-        statusDiv.textContent = "Mode manuel (Accès page limité).";
+        if (titleInput) titleInput.value = currentTab.title;
+        if (llmInput) llmInput.value = detectLLM(currentTab.url);
+        statusDiv.textContent = "Mode manuel.";
     }
 
   } catch (err) {
@@ -244,6 +237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           statusDiv.textContent = "Erreur: " + e.message;
           statusDiv.className = "status error";
           saveBtn.disabled = false;
+          saveBtn.textContent = "Réessayer";
       }
   });
 });
