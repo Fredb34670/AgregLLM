@@ -145,41 +145,73 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         if (browser.scripting && browser.scripting.executeScript) {
             // V3 (Chrome)
+            console.log("AgregLLM: Utilisation de browser.scripting");
             const results = await browser.scripting.executeScript({
                 target: { tabId: currentTab.id },
                 func: capturePageLogic
             });
+            console.log("AgregLLM: Résultats V3", results);
             if (results && results[0] && results[0].result) extracted = results[0].result;
         } else if (browser.tabs.executeScript) {
             // V2 (Firefox)
-            // On convertit la fonction en chaîne de caractères pour l'injecter
+            console.log("AgregLLM: Utilisation de browser.tabs.executeScript");
             const code = `(${capturePageLogic.toString()})();`;
             const results = await browser.tabs.executeScript(currentTab.id, { code });
+            console.log("AgregLLM: Résultats V2", results);
             if (results && results[0]) extracted = results[0];
         }
     } catch (injectionError) {
         console.error("Erreur injection:", injectionError);
-        statusDiv.textContent = "Erreur accès page : " + injectionError.message;
+        statusDiv.textContent = "Erreur injection : " + injectionError.message;
     }
 
-            if (extracted && !extracted.error) {
-                titleInput.value = extracted.title || currentTab.title;
-                llmInput.value = extracted.llm || "Web";
-                summaryInput.value = extracted.summary || "";
-                if (extracted.tags) tagsInput.value = extracted.tags.join(', ');
-                if (extracted.date) dateInput.value = extracted.date.split('T')[0];
-                
-                statusDiv.textContent = "Données récupérées.";        statusDiv.className = "status success";
+    if (extracted) {
+        if (extracted.error) {
+            console.error("Erreur logique capture:", extracted.error);
+            statusDiv.textContent = "Erreur capture : " + extracted.error;
+        }
+        
+        titleInput.value = extracted.title || currentTab.title;
+        llmInput.value = extracted.llm || "Web";
+        summaryInput.value = extracted.summary || "";
+        if (extracted.tags) tagsInput.value = extracted.tags.join(', ');
+        if (extracted.date) dateInput.value = extracted.date.split('T')[0];
+        
+        statusDiv.textContent = "Données récupérées.";
+        statusDiv.className = "status success";
     } else {
-        // Fallback ultime si l'injection échoue totalement (ex: page restreinte)
+        // Fallback ultime si l'injection ne renvoie rien
+        console.log("AgregLLM: Aucune donnée extraite, utilisation du fallback.");
         titleInput.value = currentTab.title;
-        llmInput.value = new URL(currentTab.url).hostname;
-        statusDiv.textContent = "Mode manuel (Accès page bloqué).";
+        llmInput.value = detectLLM(currentTab.url);
+        statusDiv.textContent = "Mode manuel (Accès page limité).";
     }
 
   } catch (err) {
     statusDiv.textContent = "Erreur: " + err.message;
     statusDiv.className = "status error";
+  }
+
+  function detectLLM(url) {
+      if (!url) return "Web";
+      try {
+          const hostname = new URL(url).hostname;
+          if (hostname.includes('openai') || hostname.includes('chatgpt')) return 'ChatGPT';
+          if (hostname.includes('claude')) return 'Claude';
+          if (hostname.includes('gemini') || hostname.includes('google')) return 'Gemini';
+          if (hostname.includes('mistral')) return 'Mistral';
+          if (hostname.includes('perplexity')) return 'Perplexity';
+          if (hostname.includes('deepseek')) return 'DeepSeek';
+          
+          const parts = hostname.split('.');
+          if (parts.length >= 2) {
+             const name = parts[parts.length - 2];
+             return name.charAt(0).toUpperCase() + name.slice(1);
+          }
+          return hostname;
+      } catch (e) {
+          return "Web";
+      }
   }
 
   saveBtn.addEventListener('click', async () => {
