@@ -1,4 +1,4 @@
-// google-drive.ts - Service de synchronisation Cloud (V7 Correction Init)
+// google-drive.ts - Service de synchronisation Cloud (V8 - Mode Alerte)
 
 const CLIENT_ID = "895428232613-4p8st94hs6b0a7k2j7ftl3dglikdhs0f.apps.googleusercontent.com";
 const SCOPES = "https://www.googleapis.com/auth/drive.appdata";
@@ -6,97 +6,78 @@ const SCOPES = "https://www.googleapis.com/auth/drive.appdata";
 class GoogleDriveService {
   private tokenClient: any = null;
   private accessToken: string | null = null;
-  private initPromise: Promise<void> | null = null;
 
   async init(): Promise<void> {
-    if (this.initPromise) return this.initPromise;
-
-    this.initPromise = new Promise<void>((resolve) => {
-      console.log("AgregLLM GDrive: Initialisation V7...");
-      
-      const scriptId = 'gdrive-gis-script';
-      if (document.getElementById(scriptId)) {
-        this.waitForGoogle(() => {
-          this.setupTokenClient();
-          resolve();
-        });
+    return new Promise<void>((resolve) => {
+      if ((window as any).google?.accounts?.oauth2) {
+        this.setupTokenClient();
+        resolve();
         return;
       }
 
       const script = document.createElement('script');
-      script.id = scriptId;
       script.src = "https://accounts.google.com/gsi/client";
       script.async = true;
       script.defer = true;
       script.onload = () => {
-        console.log("AgregLLM GDrive: Script chargé");
-        this.waitForGoogle(() => {
-          this.setupTokenClient();
-          resolve();
-        });
+        this.setupTokenClient();
+        resolve();
       };
       document.body.appendChild(script);
     });
-
-    return this.initPromise;
-  }
-
-  private waitForGoogle(callback: () => void) {
-    if ((window as any).google?.accounts?.oauth2) {
-      callback();
-    } else {
-      setTimeout(() => this.waitForGoogle(callback), 100);
-    }
   }
 
   private setupTokenClient() {
-    if (this.tokenClient) return;
+    if (!(window as any).google?.accounts?.oauth2) {
+      setTimeout(() => this.setupTokenClient(), 200);
+      return;
+    }
 
     this.tokenClient = (window as any).google.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
       scope: SCOPES,
       callback: (response: any) => {
-        console.log("AgregLLM GDrive: Callback reçu", response);
         if (response.error !== undefined) {
-          console.error("GDrive Error:", response.error);
+          alert("Erreur Google : " + response.error);
           return;
         }
         
         this.accessToken = response.access_token;
-        const expiry = Date.now() + (response.expires_in * 1000);
+        const expiry = Date.now() + (3500 * 1000); // 1h environ
+        
         localStorage.setItem('agregllm_gdrive_token', response.access_token);
         localStorage.setItem('agregllm_gdrive_expiry', expiry.toString());
         
-        console.log("AgregLLM GDrive: Authentification réussie");
+        alert("Connexion Google réussie !");
         window.dispatchEvent(new CustomEvent('agregllm-gdrive-auth-success'));
       },
     });
-    console.log("AgregLLM GDrive: Client configuré");
   }
 
   login() {
-    if (!this.tokenClient) {
-      console.error("AgregLLM GDrive: Client non prêt");
-      this.init().then(() => this.tokenClient?.requestAccessToken({ prompt: 'consent' }));
-      return;
+    if (this.tokenClient) {
+      this.tokenClient.requestAccessToken({ prompt: 'consent' });
+    } else {
+      alert("Le client Google n'est pas encore prêt. Réessayez dans 2 secondes.");
+      this.init();
     }
-    this.tokenClient.requestAccessToken({ prompt: 'consent' });
   }
 
   logout() {
-    this.accessToken = null;
     localStorage.removeItem('agregllm_gdrive_token');
     localStorage.removeItem('agregllm_gdrive_expiry');
-    window.dispatchEvent(new CustomEvent('agregllm-gdrive-auth-success'));
+    alert("Déconnecté de Google Drive");
+    window.location.reload();
   }
 
   isAuthenticated(): boolean {
     const token = localStorage.getItem('agregllm_gdrive_token');
     const expiry = localStorage.getItem('agregllm_gdrive_expiry');
-    return !!token && !!expiry && Date.now() < parseInt(expiry);
+    if (!token || !expiry) return false;
+    return Date.now() < parseInt(expiry);
   }
 
-  async syncToDrive(data: string): Promise<boolean> {
+  async syncToDrive(data: string) {
     const token = localStorage.getItem('agregllm_gdrive_token');
     if (!token) return false;
     try {
@@ -104,8 +85,7 @@ class GoogleDriveService {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const resData = await response.json();
-      const files = resData.files || [];
-      const existingFile = files.find((f: any) => f.name === 'agregllm_backup.json');
+      const existingFile = resData.files?.find((f: any) => f.name === 'agregllm_backup.json');
       const metadata = { name: 'agregllm_backup.json', parents: ['appDataFolder'] };
       const formData = new FormData();
       formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
@@ -124,8 +104,7 @@ class GoogleDriveService {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const resData = await response.json();
-      const files = resData.files || [];
-      const existingFile = files.find((f: any) => f.name === 'agregllm_backup.json');
+      const existingFile = resData.files?.find((f: any) => f.name === 'agregllm_backup.json');
       if (existingFile) {
         const fileResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${existingFile.id}?alt=media`, {
           headers: { 'Authorization': `Bearer ${token}` }
