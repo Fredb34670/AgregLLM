@@ -11,12 +11,17 @@ export function Settings() {
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState("");
   const [isSyncing, setIsSyncing] = useState(false);
-  const [, setRefreshTrigger] = useState(0);
+  const [authVersion, setAuthVersion] = useState(0);
 
   useEffect(() => {
-    gdrive.init();
+    gdrive.init().then(() => {
+      setAuthVersion(v => v + 1);
+    });
     
-    const handleAuthSuccess = () => setRefreshTrigger(prev => prev + 1);
+    const handleAuthSuccess = () => {
+      console.log("Settings: Auth success event received");
+      setAuthVersion(v => v + 1);
+    };
     window.addEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
     return () => window.removeEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
   }, []);
