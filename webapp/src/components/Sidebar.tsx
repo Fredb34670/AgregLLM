@@ -12,7 +12,6 @@ import {
   Folder as FolderIcon, 
   Trash2, 
   PlusCircle,
-  Link as LinkIcon,
   FileText,
   Settings,
   ChevronRight,

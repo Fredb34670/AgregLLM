@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { storage } from '../lib/storage';
 import { Conversation, Folder } from '../types';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     Search, 
     Trash2, 
-    Folder as FolderIcon, 
-    ChevronRight
+    Folder as FolderIcon
   } from 'lucide-react';export function ConversationsList() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -57,9 +56,11 @@ import {
     }
   };
 
-  const handleDragStart = (e: React.DragEvent, conversationId: string) => {
-    e.dataTransfer.setData('text/plain', conversationId);
-    e.dataTransfer.effectAllowed = 'move';
+  const handleDragStart = (e: React.DragEvent | any, conversationId: string) => {
+    if (e.dataTransfer) {
+      e.dataTransfer.setData('text/plain', conversationId);
+      e.dataTransfer.effectAllowed = 'move';
+    }
   };
 
   useEffect(() => {

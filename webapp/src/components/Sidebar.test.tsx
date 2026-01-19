@@ -41,8 +41,8 @@ describe('Sidebar', () => {
 
   it('affiche la liste des dossiers', () => {
     vi.mocked(storage.getAllFolders).mockReturnValue([
-      { id: '1', name: 'Dossier 1' },
-      { id: '2', name: 'Dossier 2' }
+      { id: '1', name: 'Dossier 1', createdAt: Date.now() },
+      { id: '2', name: 'Dossier 2', createdAt: Date.now() }
     ]);
     render(
       <MemoryRouter>

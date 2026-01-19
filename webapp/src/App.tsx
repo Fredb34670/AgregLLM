@@ -8,7 +8,7 @@ import { ConversationsList } from './components/ConversationsList';
 import { Settings } from './components/Settings';
 import { storage } from './lib/storage';
 import { gdrive } from './lib/google-drive';
-import { Conversation, Folder } from './types';
+import { Conversation } from './types';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Sidebar } from './components/Sidebar';
 import { MessageSquare, BarChart3, PieChart } from 'lucide-react';

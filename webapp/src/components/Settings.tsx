@@ -1,15 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { storage } from "../lib/storage";
 import { gdrive } from "../lib/google-drive";
-import { Download, Upload, Tag, Trash2, Edit2, Cloud, CloudOff, RefreshCw } from "lucide-react";
+import { Download, Upload, Trash2, Edit2, Cloud, CloudOff, RefreshCw } from "lucide-react";
 import { useRef, useState, useMemo, useEffect } from "react";
 
 export function Settings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState("");
-  const [isGDriveInit, setIsGDriveInit] = useState(false);
+  const [, setIsGDriveInit] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {

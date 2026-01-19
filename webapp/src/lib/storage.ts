@@ -135,12 +135,10 @@ export const storage = {
     const folders = storage.getAllFolders();
     const filtered = folders.filter(f => f.id !== id);
     
-    // Mettre à jour les sous-dossiers pour qu'ils remontent à la racine (ou perdent leur parent)
-    let folderChanged = false;
+    // Mettre à jour les sous-dossiers pour qu'ils remontent à la racine
     filtered.forEach(f => {
       if (f.parentId === id) {
         f.parentId = undefined;
-        folderChanged = true;
       }
     });
 
@@ -170,7 +168,7 @@ export const storage = {
     }
   },
 
-  // --- Export ---
+  // --- Export / Import ---
   exportData: (): string => {
     const data = {
       version: 1,
