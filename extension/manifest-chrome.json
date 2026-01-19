@@ -16,13 +16,7 @@
     "scripting"
   ],
   "host_permissions": [
-    "https://chat.openai.com/*",
-    "https://chatgpt.com/*",
-    "https://claude.ai/*",
-    "https://gemini.google.com/*",
-    "https://aistudio.google.com/*",
-    "http://localhost/*",
-    "http://127.0.0.1/*"
+    "<all_urls>"
   ],
   "background": {
     "service_worker": "background.js"

@@ -39,6 +39,32 @@ function capturePageLogic() {
             if (userMsg) summary = userMsg.innerText;
         }
 
+        // --- Mistral ---
+        else if (hostname.includes("mistral.ai")) {
+            llmName = "Mistral";
+            const titleEl = document.querySelector('h1, h2, [class*="title"]');
+            if (titleEl) title = titleEl.innerText;
+        }
+
+        // --- Perplexity ---
+        else if (hostname.includes("perplexity.ai")) {
+            llmName = "Perplexity";
+            const titleEl = document.querySelector('h1, [class*="title"]');
+            if (titleEl) title = titleEl.innerText;
+        }
+
+        // --- DeepSeek ---
+        else if (hostname.includes("deepseek.com")) {
+            llmName = "DeepSeek";
+            const titleEl = document.querySelector('[class*="title"]');
+            if (titleEl) title = titleEl.innerText;
+        }
+
+        // --- HuggingChat ---
+        else if (hostname.includes("huggingface.co")) {
+            llmName = "HuggingChat";
+        }
+
         // --- Fallback Général ---
         else {
             const domainParts = hostname.split('.');
@@ -47,8 +73,9 @@ function capturePageLogic() {
             } else {
                 llmName = hostname;
             }
+            // On cherche un titre de niveau 1 ou l'élément le plus probable pour un titre de discussion
             const h1 = document.querySelector('h1');
-            if (h1) summary = h1.innerText;
+            if (h1) title = h1.innerText;
         }
 
         // Nettoyage

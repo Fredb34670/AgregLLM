@@ -12,13 +12,8 @@
     "storage",
     "contextMenus",
     "tabs",
-    "https://chatgpt.com/*",
-    "https://chat.openai.com/*",
-    "https://claude.ai/*",
-    "https://gemini.google.com/*",
-    "https://aistudio.google.com/*",
-    "http://localhost/*",
-    "http://127.0.0.1/*"
+    "activeTab",
+    "<all_urls>"
   ],
   "background": {
     "scripts": ["vendor/browser-polyfill.js", "background.js"]
