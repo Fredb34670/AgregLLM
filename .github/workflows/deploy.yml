@@ -3,7 +3,7 @@ name: Deploy Webapp to GitHub Pages
 # Wake up trigger
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'webapp/**'
       - '.github/workflows/deploy.yml'
