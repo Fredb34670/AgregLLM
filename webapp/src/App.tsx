@@ -39,6 +39,20 @@ function Welcome() {
 
   useEffect(() => {
     setConversations(storage.getAllConversations());
+    
+    // Écouter les synchronisations depuis l'extension
+    const handleSync = () => {
+      console.log('Sync event received from extension');
+      setConversations(storage.getAllConversations());
+    };
+    
+    window.addEventListener('agregllm-sync', handleSync);
+    window.addEventListener('storage', handleSync);
+    
+    return () => {
+      window.removeEventListener('agregllm-sync', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
   }, []);
 
   const stats = useMemo(() => {

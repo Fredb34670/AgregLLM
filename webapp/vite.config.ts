@@ -4,7 +4,7 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/AgregLLM/',
+  base: process.env.GITHUB_PAGES === 'true' ? '/AgregLLM/' : './',
   plugins: [react()],
   resolve: {
     alias: {
@@ -16,4 +16,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
   },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    sourcemap: false,
+  }
 })

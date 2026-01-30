@@ -116,7 +116,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Ouvrir l'application
   if (openAppBtn) {
     openAppBtn.addEventListener('click', () => {
-      browser.tabs.create({ url: "https://fredb34670.github.io/AgregLLM/" });
+      // Ouvrir l'application web hébergée (localhost en dev, GitHub Pages en prod)
+      const webappUrl = "http://localhost:5173"; // Changez par votre URL de prod si nécessaire
+      browser.tabs.create({ url: webappUrl });
     });
   }
   
@@ -145,11 +147,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     currentTab = tabs[0];
+    console.log("URL de l'onglet actif:", currentTab.url);
     
     if (!currentTab || !currentTab.url) {
         statusDiv.textContent = "Impossible d'accéder à l'onglet.";
         saveBtn.disabled = true;
         return;
+    }
+
+    // Vérifier si l'URL est injectable avant de continuer
+    if (!currentTab.url.startsWith('http:') && !currentTab.url.startsWith('https:')) {
+        if (titleInput) titleInput.value = currentTab.title || "";
+        if (llmInput) llmInput.value = "Web";
+        statusDiv.textContent = "Page non-standard. Mode manuel.";
+        return; 
     }
 
     // Injection Directe (Compatible V2/V3)

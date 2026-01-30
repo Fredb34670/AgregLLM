@@ -1,18 +1,19 @@
 {
   "manifest_version": 2,
   "name": "AgregLLM",
-  "version": "1.1.4",
-  "description": "Agrégateur de discussions LLM",
+  "version": "1.1.5",
+  "description": "Agregateur de discussions LLM",
   "icons": {
-    "16": "icon.svg",
-    "48": "icon.svg",
-    "128": "icon.svg"
+    "48": "icon-192.png",
+    "96": "icon-192.png",
+    "128": "icon-192.png"
   },
   "permissions": [
     "storage",
     "contextMenus",
     "tabs",
     "activeTab",
+    "notifications",
     "<all_urls>"
   ],
   "background": {
@@ -29,6 +30,16 @@
     }
   ],
   "browser_action": {
-    "default_popup": "popup.html"
-  }
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icon-192.png",
+      "96": "icon-192.png"
+    }
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "web_accessible_resources": [
+    "index.html",
+    "assets/*",
+    "test.html"
+  ]
 }

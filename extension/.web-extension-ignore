@@ -1,0 +1,23 @@
+# Fichiers de développement et de configuration inutiles en prod
+node_modules/
+package.json
+package-lock.json
+*.bat
+*.md
+
+# Scripts de build et tests
+generate_icons.js
+**/*.test.js
+
+# Manifestes alternatifs (on utilise manifest.json pour Firefox)
+manifest-chrome.json
+manifest-firefox.json
+
+# Artefacts de sortie
+web-ext-artifacts/
+*.zip
+*.xpi
+
+# Système
+.DS_Store
+Thumbs.db

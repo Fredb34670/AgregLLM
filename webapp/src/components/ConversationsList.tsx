@@ -207,13 +207,13 @@ export function ConversationsList() {
                         <CardTitle className="text-lg font-bold truncate group-hover/card:text-primary transition-colors">
                           {conv.title}
                         </CardTitle>
-                        <Badge variant="outline" className="bg-primary/5 text-primary/80 border-primary/20 shrink-0 text-[10px] px-2 py-0 h-5">
+                        <Badge variant="outline" className="bg-primary/10 text-primary font-bold border-primary/30 shrink-0 text-[10px] px-2 py-0 h-5">
                           {conv.llm}
                         </Badge>
                       </div>
                       
-                      <div className="flex items-center gap-3 shrink-0 mr-10">
-                        <p className="text-xs text-muted-foreground font-semibold whitespace-nowrap">
+                      <div className="flex items-center gap-3 shrink-0 mr-12 h-full">
+                        <p className="text-xs text-muted-foreground font-semibold whitespace-nowrap self-center">
                           {new Date(conv.date || conv.capturedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
                       </div>
@@ -246,7 +246,7 @@ export function ConversationsList() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 w-9"
+                  className="absolute right-3 top-[18px] opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8"
                   onClick={(e) => handleDelete(e, conv)}
                   title="Supprimer la discussion"
                 >

@@ -1,0 +1,19 @@
+.gemini/
+gha-creds-*.json
+
+# Node modules
+node_modules/
+webapp/node_modules/
+extension/node_modules/
+
+# Build artifacts (ne pas commit les builds locaux)
+dist-extensions/
+webapp/dist/
+
+# Temporary files
+tmp_*
+*.log
+
+# IDE
+.vscode/
+.idea/
