@@ -116,8 +116,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Ouvrir l'application
   if (openAppBtn) {
     openAppBtn.addEventListener('click', () => {
-      // Ouvrir l'application web hébergée (localhost en dev, GitHub Pages en prod)
-      const webappUrl = "http://localhost:5173"; // Changez par votre URL de prod si nécessaire
+      // URL de l'application web (GitHub Pages)
+      const webappUrl = "https://fredb34670.github.io/AgregLLM/";
       browser.tabs.create({ url: webappUrl });
     });
   }

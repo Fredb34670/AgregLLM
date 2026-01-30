@@ -63,16 +63,11 @@ Write-Host "Building Chrome extension..." -ForegroundColor Cyan
 $chromeDir = "$outputDir/chrome"
 New-Item -ItemType Directory -Path $chromeDir | Out-Null
 
-# Copier manifest Chrome avec background-chrome.js
+# Copier manifest Chrome
 Copy-Item "extension/manifest-chrome.json" "$chromeDir/manifest.json"
 
-# Modifier le manifest pour utiliser background-chrome.js
-$manifest = Get-Content "$chromeDir/manifest.json" | ConvertFrom-Json
-$manifest.background.service_worker = "background-chrome.js"
-$manifest | ConvertTo-Json -Depth 10 | Set-Content "$chromeDir/manifest.json"
-
-# Copier background-chrome.js
-Copy-Item "extension/background-chrome.js" "$chromeDir/background.js"
+# Copier background-chrome.js en tant que background-chrome.js (pas background.js)
+Copy-Item "extension/background-chrome.js" "$chromeDir/background-chrome.js"
 
 # Copier les autres fichiers
 foreach ($file in $files) {

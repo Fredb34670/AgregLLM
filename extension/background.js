@@ -231,9 +231,9 @@ async function saveConversation(data) {
         console.log("Successfully saved to storage!");
         
         // Synchroniser aussi avec localStorage pour la webapp
-        // Notification Webapp (Local et GitHub Pages)
+        // Notification Webapp (GitHub Pages et localhost en dev)
         const tabs = await browser.tabs.query({ 
-            url: ["*://localhost/*", "*://127.0.0.1/*", "https://fredb34670.github.io/AgregLLM/*"] 
+            url: ["https://fredb34670.github.io/AgregLLM/*", "*://localhost/*", "*://127.0.0.1/*"] 
         });
         
         // Injecter un script pour mettre à jour le localStorage de la webapp

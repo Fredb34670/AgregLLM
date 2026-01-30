@@ -33,16 +33,19 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
     }
 });
 
-chrome.contextMenus.create({
-  id: "save-to-agregllm",
-  title: "Sauvegarder dans AgregLLM",
-  contexts: ["all"]
-}, () => {
-  if (chrome.runtime.lastError) {
-    console.log("Menu Contextuel Erreur:", chrome.runtime.lastError);
-  } else {
-    console.log("Menu Contextuel OK");
-  }
+// Supprimer le menu existant s'il existe, puis le recréer
+chrome.contextMenus.remove("save-to-agregllm", () => {
+  chrome.contextMenus.create({
+    id: "save-to-agregllm",
+    title: "Sauvegarder dans AgregLLM",
+    contexts: ["all"]
+  }, () => {
+    if (chrome.runtime.lastError) {
+      console.error("Menu Contextuel Erreur:", chrome.runtime.lastError.message);
+    } else {
+      console.log("Menu Contextuel OK");
+    }
+  });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -130,7 +133,79 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       console.log("Executing capture code in tab...");
       const results = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        func: new Function('return ' + captureCode)
+        func: function() {
+          const hostname = window.location.hostname;
+          let llmName = "Inconnu";
+          let title = document.title;
+          let summary = "";
+
+          if (hostname.includes("chatgpt.com") || hostname.includes("openai.com")) {
+            llmName = "ChatGPT";
+            const titleEl = document.querySelector('div[class*="title"], h1');
+            if (titleEl) title = titleEl.innerText;
+            const userMsg = document.querySelector('[data-message-author-role="user"]');
+            if (userMsg) summary = userMsg.innerText;
+          } else if (hostname.includes("claude.ai")) {
+            llmName = "Claude";
+            const titleEl = document.querySelector('h3, div[class*="truncate"]');
+            if (titleEl && titleEl.innerText.length > 2) title = titleEl.innerText;
+            const userMsg = document.querySelector('.font-user-message, [data-test-id="user-message"]');
+            if (userMsg) summary = userMsg.innerText;
+          } else if (hostname.includes("gemini.google.com")) {
+            llmName = "Gemini";
+            const titleEl = document.querySelector('h1[class*="title"], .conversation-title');
+            if (titleEl) title = titleEl.innerText;
+            const userMsg = document.querySelector('.user-query-text, user-query');
+            if (userMsg) summary = userMsg.innerText;
+          } else if (hostname.includes("aistudio.google.com")) {
+            llmName = "AI Studio";
+            const titleEl = document.querySelector('div[class*="title"]');
+            if (titleEl) title = titleEl.innerText;
+            const promptArea = document.querySelector('textarea, .prompt-text-area');
+            if (promptArea) summary = promptArea.value;
+          } else if (hostname.includes("mistral.ai")) {
+            llmName = "Mistral";
+          } else if (hostname.includes("perplexity.ai")) {
+            llmName = "Perplexity";
+          } else if (hostname.includes("deepseek.com")) {
+            llmName = "DeepSeek";
+          } else {
+            const domainParts = hostname.split('.');
+            if (domainParts.length >= 2) {
+              llmName = domainParts[domainParts.length - 2].charAt(0).toUpperCase() + 
+                        domainParts[domainParts.length - 2].slice(1);
+            } else {
+              llmName = hostname;
+            }
+          }
+
+          title = title.trim();
+          if (!title || title.toLowerCase() === llmName.toLowerCase()) {
+            title = "Discussion " + llmName + " (" + new Date().toLocaleDateString() + ")";
+          }
+
+          if (summary) {
+            summary = summary.trim().substring(0, 200);
+            if (summary.length === 200) summary += "...";
+          } else {
+            summary = "Aperçu non disponible.";
+          }
+
+          const stopWords = ['le', 'la', 'les', 'un', 'une', 'des', 'ce', 'cet', 'cette', 'ces', 'de', 'du', 'est', 'sont'];
+          const tagSource = (title + " " + summary).toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, " ").split(/\s+/);
+          const suggestedTags = [...new Set(tagSource.filter(word => word.length > 4 && !stopWords.includes(word)))].slice(0, 3);
+          console.log('DEBUG tags:', { title, summary, tagSource: tagSource.slice(0, 10), suggestedTags });
+
+          return {
+            title: title,
+            url: window.location.href,
+            llm: llmName,
+            date: new Date().toISOString(),
+            summary: summary,
+            tags: suggestedTags,
+            messages: []
+          };
+        }
       });
       
       if (results && results[0] && results[0].result) {
@@ -200,7 +275,7 @@ async function saveConversation(data) {
         
         // Synchroniser avec localStorage de la webapp
         const tabs = await chrome.tabs.query({ 
-            url: ["*://localhost/*", "*://127.0.0.1/*", "https://fredb34670.github.io/AgregLLM/*"] 
+            url: ["https://fredb34670.github.io/AgregLLM/*", "*://localhost/*", "*://127.0.0.1/*"] 
         });
         
         tabs.forEach(async (tab) => {
@@ -217,7 +292,13 @@ async function saveConversation(data) {
                 
                 await chrome.scripting.executeScript({
                     target: { tabId: tab.id },
-                    func: new Function(code)
+                    func: function(conversationsList) {
+                        localStorage.setItem('agregllm_conversations', JSON.stringify(conversationsList));
+                        console.log('AgregLLM: Conversations synchronized from extension', conversationsList.length);
+                        window.dispatchEvent(new Event('storage'));
+                        window.dispatchEvent(new Event('agregllm-sync-complete'));
+                    },
+                    args: [list]
                 });
                 
                 console.log("Synchronized with webapp tab:", tab.id);
