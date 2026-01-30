@@ -1,7 +1,7 @@
 // google-drive.ts - Service de synchronisation Cloud (V9 Stable)
 
 const CLIENT_ID = "895428232613-4p8st94hs6b0a7k2j7ftl3dglikdhs0f.apps.googleusercontent.com";
-const SCOPES = "https://www.googleapis.com/auth/drive.appdata";
+const SCOPES = "https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email";
 
 class GoogleDriveService {
   private tokenClient: any = null;
@@ -80,6 +80,32 @@ class GoogleDriveService {
     return Date.now() < (parseInt(expiry) - 60000);
   }
 
+  async getUserInfo(): Promise<{ name: string; email: string } | null> {
+    const token = localStorage.getItem('agregllm_gdrive_token');
+    if (!token) return null;
+
+    try {
+      const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      
+      // Sauvegarder les infos pour ne pas les redemander
+      localStorage.setItem('agregllm_gdrive_user', JSON.stringify({ name: data.name || data.email, email: data.email }));
+      
+      return {
+        name: data.name || data.email,
+        email: data.email
+      };
+    } catch (e) {
+      console.error('Error fetching user info:', e);
+      // Essayer de charger depuis le cache
+      const cached = localStorage.getItem('agregllm_gdrive_user');
+      return cached ? JSON.parse(cached) : null;
+    }
+  }
+
   async syncToDrive(data: string): Promise<boolean> {
     const token = localStorage.getItem('agregllm_gdrive_token');
     if (!token) return false;
@@ -132,6 +158,33 @@ class GoogleDriveService {
       }
     } catch (e) { }
     return null;
+  }
+
+  // Auto-sync: synchronise automatiquement si connecté
+  async autoSync(data: string): Promise<void> {
+    if (!this.isAuthenticated()) return;
+    
+    // Éviter de synchroniser trop souvent (debounce)
+    const lastSync = localStorage.getItem('agregllm_last_sync');
+    const now = Date.now();
+    if (lastSync && (now - parseInt(lastSync)) < 5000) {
+      // Moins de 5 secondes depuis la dernière sync, on attend
+      return;
+    }
+    
+    const success = await this.syncToDrive(data);
+    if (success) {
+      localStorage.setItem('agregllm_last_sync', now.toString());
+      console.log('Auto-sync Google Drive: OK');
+    }
+  }
+
+  // Charger automatiquement au démarrage
+  async autoLoad(): Promise<string | null> {
+    if (!this.isAuthenticated()) return null;
+    
+    console.log('Auto-loading from Google Drive...');
+    return await this.loadFromDrive();
   }
 }
 

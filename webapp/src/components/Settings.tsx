@@ -12,12 +12,35 @@ export function Settings() {
   const [newTagName, setNewTagName] = useState("");
   const [isSyncing, setIsSyncing] = useState(false);
   const [, setTick] = useState(0);
+  const [userInfo, setUserInfo] = useState<{ name: string; email: string } | null>(null);
 
   useEffect(() => {
     gdrive.init();
+    
+    // Charger les infos utilisateur si connecté
+    if (gdrive.isAuthenticated()) {
+      gdrive.getUserInfo().then(setUserInfo);
+    }
+    
+    // Écouter l'événement de connexion réussie
+    const handleAuthSuccess = async () => {
+      if (gdrive.isAuthenticated()) {
+        const info = await gdrive.getUserInfo();
+        setUserInfo(info);
+      } else {
+        setUserInfo(null);
+      }
+    };
+    
+    window.addEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
+    
     // Force le rafraichissement toutes les secondes pour l'état du bouton
     const interval = setInterval(() => setTick(t => t + 1), 1000);
-    return () => clearInterval(interval);
+    
+    return () => {
+      window.removeEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
+      clearInterval(interval);
+    };
   }, []);
 
   const isConnected = gdrive.isAuthenticated();
@@ -78,13 +101,15 @@ export function Settings() {
             <div className="flex items-center justify-between p-2">
               <div className="space-y-1">
                 <p className="text-sm font-bold text-green-600">✓ Connecté au Cloud</p>
-                <p className="text-xs text-muted-foreground">Vos données sont sur Google Drive.</p>
+                <p className="text-xs text-muted-foreground">
+                  {userInfo ? `Compte Google: ${userInfo.email}` : 'Vos données sont sur Google Drive.'}
+                </p>
               </div>
               <div className="flex gap-2">
                 <Button onClick={handleSyncNow} disabled={isSyncing} variant="outline" size="sm">
                   <RefreshCw className={isSyncing ? "animate-spin" : ""} /> Sync.
                 </Button>
-                <Button onClick={() => gdrive.logout()} variant="ghost" size="sm" className="text-destructive">
+                <Button onClick={() => { gdrive.logout(); setUserInfo(null); }} variant="ghost" size="sm" className="text-destructive">
                   Déconnexion
                 </Button>
               </div>
@@ -97,9 +122,39 @@ export function Settings() {
         <Card>
           <CardHeader><CardTitle className="text-lg">Sauvegarde locale</CardTitle></CardHeader>
           <CardContent className="space-y-2">
-            <Button onClick={() => {
-              const blob = new Blob([storage.exportData()], { type: 'application/json' });
-              const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'agregllm.json'; a.click();
+            <Button onClick={async () => {
+              const data = storage.exportData();
+              const date = new Date().toISOString().split('T')[0];
+              const filename = `agregllm-backup-${date}.json`;
+              
+              // Essayer File System Access API (Chrome/Edge)
+              if ('showSaveFilePicker' in window) {
+                try {
+                  const handle = await (window as any).showSaveFilePicker({
+                    suggestedName: filename,
+                    types: [{
+                      description: 'JSON Files',
+                      accept: { 'application/json': ['.json'] }
+                    }]
+                  });
+                  const writable = await handle.createWritable();
+                  await writable.write(data);
+                  await writable.close();
+                  alert('Sauvegarde réussie !');
+                  return;
+                } catch (e) {
+                  // Utilisateur a annulé ou erreur
+                  if ((e as Error).name !== 'AbortError') console.error(e);
+                  return;
+                }
+              }
+              
+              // Fallback : téléchargement classique
+              const blob = new Blob([data], { type: 'application/json' });
+              const a = document.createElement('a');
+              a.href = URL.createObjectURL(blob);
+              a.download = filename;
+              a.click();
             }} variant="outline" className="w-full text-xs">Exporter JSON</Button>
             <input type="file" ref={fileInputRef} className="hidden" onChange={(e) => {
               const file = e.target.files?.[0];

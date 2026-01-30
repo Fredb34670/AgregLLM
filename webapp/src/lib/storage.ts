@@ -4,6 +4,17 @@ import { generateTags, findBestFolder } from './automation';
 const STORAGE_KEY_CONVERSATIONS = 'agregllm_conversations';
 const STORAGE_KEY_FOLDERS = 'agregllm_folders';
 
+// Helper pour déclencher auto-sync après modification
+const triggerAutoSync = () => {
+  // Import dynamique pour éviter les dépendances circulaires
+  import('./google-drive').then(({ gdrive }) => {
+    const data = storage.exportData();
+    gdrive.autoSync(data);
+  }).catch(() => {
+    // Ignore si le module n'est pas disponible
+  });
+};
+
 export const storage = {
   // --- Conversations ---
   getAllConversations: (): Conversation[] => {
@@ -50,12 +61,14 @@ export const storage = {
     }
     
     localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(all));
+    triggerAutoSync(); // Auto-sync après sauvegarde
   },
 
   deleteConversation: (id: string): void => {
     const all = storage.getAllConversations();
     const filtered = all.filter(c => c.id !== id);
     localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(filtered));
+    triggerAutoSync(); // Auto-sync après suppression
   },
 
   toggleFavorite: (id: string): void => {
@@ -64,6 +77,7 @@ export const storage = {
     if (index >= 0) {
       all[index].isFavorite = !all[index].isFavorite;
       localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(all));
+      triggerAutoSync(); // Auto-sync après changement favori
     }
   },
 
@@ -73,6 +87,7 @@ export const storage = {
     if (index >= 0) {
       all[index].tags = tags;
       localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(all));
+      triggerAutoSync(); // Auto-sync après modification tags
     }
   },
 
@@ -88,6 +103,7 @@ export const storage = {
     });
     if (changed) {
       localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(all));
+      triggerAutoSync(); // Auto-sync après renommage tag
     }
   },
 
@@ -102,6 +118,7 @@ export const storage = {
     });
     if (changed) {
       localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(all));
+      triggerAutoSync(); // Auto-sync après suppression tag
     }
   },
 
@@ -111,6 +128,7 @@ export const storage = {
     if (index >= 0) {
       all[index].folderId = folderId;
       localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(all));
+      triggerAutoSync(); // Auto-sync après déplacement
     }
   },
 
@@ -137,6 +155,7 @@ export const storage = {
     };
     folders.push(newFolder);
     localStorage.setItem(STORAGE_KEY_FOLDERS, JSON.stringify(folders));
+    triggerAutoSync(); // Auto-sync après création dossier
     return newFolder;
   },
 
@@ -165,6 +184,7 @@ export const storage = {
     if (convChanged) {
       localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(conversations));
     }
+    triggerAutoSync(); // Auto-sync après suppression dossier
   },
 
   updateFolder: (id: string, name: string, color?: string): void => {
@@ -174,6 +194,7 @@ export const storage = {
       folders[index].name = name;
       if (color !== undefined) folders[index].color = color;
       localStorage.setItem(STORAGE_KEY_FOLDERS, JSON.stringify(folders));
+      triggerAutoSync(); // Auto-sync après modification dossier
     }
   },
 

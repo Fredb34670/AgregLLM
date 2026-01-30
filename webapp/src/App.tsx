@@ -36,9 +36,25 @@ function Layout({ children }: { children: React.ReactNode }) {
 
 function Welcome() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setConversations(storage.getAllConversations());
+    // Charger automatiquement depuis Google Drive au démarrage
+    const loadData = async () => {
+      setIsLoading(true);
+      
+      // Essayer de charger depuis Google Drive
+      const cloudData = await gdrive.autoLoad();
+      if (cloudData) {
+        console.log('Loading conversations from Google Drive...');
+        storage.importData(cloudData);
+      }
+      
+      setConversations(storage.getAllConversations());
+      setIsLoading(false);
+    };
+    
+    loadData();
     
     // Écouter les synchronisations depuis l'extension
     const handleSync = () => {
@@ -62,6 +78,17 @@ function Welcome() {
     });
     return Object.entries(counts).sort((a, b) => b[1] - a[1]);
   }, [conversations]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Chargement depuis Google Drive...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center py-12">

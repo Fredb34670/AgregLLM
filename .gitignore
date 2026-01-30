@@ -13,7 +13,16 @@ webapp/dist/
 # Temporary files
 tmp_*
 *.log
+*.png
+*.exe
+*.crx
+*.pem
+*.zip
 
 # IDE
 .vscode/
 .idea/
+
+# OS files
+.DS_Store
+Thumbs.db
