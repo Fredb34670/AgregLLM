@@ -7,6 +7,28 @@ Write-Host "1. Building Webapp..." -ForegroundColor Cyan
 Set-Location webapp
 npm run build
 Write-Host "✓ Webapp built in webapp/dist" -ForegroundColor Green
+
+# Synchroniser les assets avec l'extension
+Write-Host "Syncing assets to extension..." -ForegroundColor Yellow
+$extAssets = "../extension/assets"
+if (-not (Test-Path $extAssets)) { New-Item -ItemType Directory -Path $extAssets }
+Remove-Item "$extAssets/index-*.js", "$extAssets/index-*.css" -ErrorAction SilentlyContinue
+Copy-Item "dist/assets/index-*.js" $extAssets
+Copy-Item "dist/assets/index-*.css" $extAssets
+
+# Mettre à jour index.html de l'extension avec les nouveaux hashes
+$distIndex = Get-Content "dist/index.html" -Raw
+$jsHash = [regex]::Match($distIndex, 'index-[\w-]+\.js').Value
+$cssHash = [regex]::Match($distIndex, 'index-[\w-]+\.css').Value
+
+if ($jsHash -and $cssHash) {
+    $extIndex = Get-Content "../extension/index.html" -Raw
+    $extIndex = $extIndex -replace 'index-[\w-]+\.js', $jsHash
+    $extIndex = $extIndex -replace 'index-[\w-]+\.css', $cssHash
+    $extIndex | Set-Content "../extension/index.html"
+    Write-Host "✓ Extension index.html updated with $jsHash and $cssHash" -ForegroundColor Green
+}
+
 Set-Location ..
 
 # Build Webapp pour GitHub Pages

@@ -27,6 +27,14 @@ export function Settings() {
       if (gdrive.isAuthenticated()) {
         const info = await gdrive.getUserInfo();
         setUserInfo(info);
+        
+        // Déclencher une récupération immédiate des données
+        console.log("AgregLLM: Auth success, fetching cloud data...");
+        const cloudData = await gdrive.loadFromDrive();
+        if (cloudData) {
+          storage.importData(cloudData);
+          window.dispatchEvent(new Event('storage'));
+        }
       } else {
         setUserInfo(null);
       }
@@ -87,7 +95,12 @@ export function Settings() {
           {!isConnected ? (
             <div className="space-y-4 p-2">
               <div className="flex items-center justify-between">
-                <p className="text-sm">Connectez votre compte pour synchroniser vos appareils.</p>
+                <div className="space-y-1">
+                  <p className="text-sm">Connectez votre compte pour synchroniser vos appareils.</p>
+                  <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                    ⚠️ Les données resteront en local, et ne seront pas affichées si l'extension est utilisée sur un autre ordinateur.
+                  </p>
+                </div>
                 <Button onClick={() => gdrive.login()}>Se connecter</Button>
               </div>
               <div className="text-[11px] bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 p-3 rounded-md text-amber-800 dark:text-amber-200 leading-relaxed shadow-sm">

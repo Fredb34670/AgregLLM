@@ -18,6 +18,7 @@ $files = @(
     "icon-192.png",
     "icon-512.png",
     "icon.svg",
+    "index.html",
     "manifest.json"
 )
 

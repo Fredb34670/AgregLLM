@@ -116,8 +116,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Ouvrir l'application
   if (openAppBtn) {
     openAppBtn.addEventListener('click', () => {
-      // URL de l'application web (GitHub Pages)
-      const webappUrl = "https://fredb34670.github.io/AgregLLM/";
+      // URL de l'application web (Priorité à la version locale incluse dans l'extension pour le dev/test)
+      const webappUrl = browser.runtime.getURL("index.html");
       browser.tabs.create({ url: webappUrl });
     });
   }

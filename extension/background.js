@@ -233,7 +233,12 @@ async function saveConversation(data) {
         // Synchroniser aussi avec localStorage pour la webapp
         // Notification Webapp (GitHub Pages et localhost en dev)
         const tabs = await browser.tabs.query({ 
-            url: ["https://fredb34670.github.io/AgregLLM/*", "*://localhost/*", "*://127.0.0.1/*"] 
+            url: [
+                "https://fredb34670.github.io/AgregLLM/*", 
+                "*://localhost/*", 
+                "*://127.0.0.1/*",
+                "moz-extension://*/index.html*"
+            ] 
         });
         
         // Injecter un script pour mettre à jour le localStorage de la webapp
@@ -241,10 +246,26 @@ async function saveConversation(data) {
             try {
                 const code = `
                     (function() {
-                        const conversations = ${JSON.stringify(list)};
-                        localStorage.setItem('agregllm_conversations', JSON.stringify(conversations));
-                        console.log('AgregLLM: Conversations synchronized from extension', conversations.length);
-                        // Déclencher un événement pour que l'app se rafraîchisse
+                        const extConversations = ${JSON.stringify(list)};
+                        const currentData = localStorage.getItem('agregllm_conversations');
+                        let webConversations = currentData ? JSON.parse(currentData) : [];
+                        
+                        const mergedConversations = extConversations.map(extConv => {
+                            const existing = webConversations.find(w => w.url === extConv.url);
+                            if (existing) {
+                                return {
+                                    ...extConv,
+                                    id: existing.id,
+                                    folderId: existing.folderId,
+                                    isFavorite: existing.isFavorite,
+                                    tags: extConv.tags && extConv.tags.length > 0 ? extConv.tags : existing.tags
+                                };
+                            }
+                            return extConv;
+                        });
+
+                        localStorage.setItem('agregllm_conversations', JSON.stringify(mergedConversations));
+                        console.log('AgregLLM: Conversations synchronized from extension', mergedConversations.length);
                         window.dispatchEvent(new Event('storage'));
                         window.dispatchEvent(new Event('agregllm-sync-complete'));
                     })();

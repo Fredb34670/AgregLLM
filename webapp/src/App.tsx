@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { useNavigate, Navigate, Routes, Route, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +37,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 function Welcome() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isConnected, setIsConnected] = useState(gdrive.isAuthenticated());
 
   useEffect(() => {
     // Charger automatiquement depuis Google Drive au démarrage
@@ -58,16 +59,22 @@ function Welcome() {
     
     // Écouter les synchronisations depuis l'extension
     const handleSync = () => {
-      console.log('Sync event received from extension');
       setConversations(storage.getAllConversations());
+    };
+    
+    const handleAuthSuccess = () => {
+      setIsConnected(gdrive.isAuthenticated());
+      loadData();
     };
     
     window.addEventListener('agregllm-sync', handleSync);
     window.addEventListener('storage', handleSync);
+    window.addEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
     
     return () => {
       window.removeEventListener('agregllm-sync', handleSync);
       window.removeEventListener('storage', handleSync);
+      window.removeEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
     };
   }, []);
 
@@ -96,9 +103,37 @@ function Welcome() {
         <MessageSquare className="h-10 w-10" />
       </div>
       <h2 className="text-4xl font-extrabold tracking-tight mb-4 text-center">Bienvenue dans AgregLLM</h2>
-      <p className="text-muted-foreground text-xl mb-10 text-center max-w-lg leading-relaxed">
+      <p className="text-muted-foreground text-xl mb-4 text-center max-w-lg leading-relaxed">
         Votre hub central pour organiser, filtrer et retrouver toutes vos discussions d'intelligence artificielle.
       </p>
+
+      {!isConnected && (
+        <div className="mb-10 w-full max-w-lg">
+          <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-500/30 p-5 rounded-2xl flex flex-col items-center gap-4 shadow-sm text-center">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">☁️</span>
+              <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed font-semibold">
+                Synchronisez vos discussions sur tous vos appareils
+              </p>
+            </div>
+            <p className="text-xs text-amber-700/80 dark:text-amber-300/80">
+              Actuellement, vos données sont stockées uniquement sur cet ordinateur. Connectez votre Google Drive pour les sécuriser et les retrouver partout.
+            </p>
+            <Button 
+                onClick={() => gdrive.login()} 
+                variant="outline" 
+                size="sm" 
+                className="bg-amber-500 text-white hover:bg-amber-600 border-none font-bold py-4 px-6 rounded-xl shadow-lg shadow-amber-500/20"
+            >
+              Se connecter au Cloud
+            </Button>
+          </div>
+        </div>
+      )}
+      
+      {gdrive.isAuthenticated() && (
+        <div className="mb-10" />
+      )}
       
       <div className="flex gap-4 mb-16">
         <Link to="/conversations">
@@ -145,9 +180,42 @@ function Welcome() {
   );
 }
 
+
+
 function App() {
+  const navigate = useNavigate();
+
   useEffect(() => {
-    // Initialisation silencieuse et securisee de GDrive
+    // 1. Extraction du token OAuth si présent dans l'URL (cas du retour de redirection Google)
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token=')) {
+      try {
+        const tokenMatch = hash.match(/access_token=([^&]*)/);
+        const expiresMatch = hash.match(/expires_in=([^&]*)/);
+        const token = tokenMatch ? tokenMatch[1] : null;
+        const expiresIn = expiresMatch ? expiresMatch[1] : '3600';
+        
+        if (token) {
+          console.log("AgregLLM: OAuth token detected in URL, saving...");
+          const expiry = Date.now() + (parseInt(expiresIn) * 1000);
+          localStorage.setItem('agregllm_gdrive_token', token);
+          localStorage.setItem('agregllm_gdrive_expiry', expiry.toString());
+          
+          window.dispatchEvent(new CustomEvent('agregllm-gdrive-auth-success'));
+          
+          // Fermer la fenêtre si c'est un popup (cas windows.create ou window.open)
+          if (window.name === "AgregLLMAuth" || !window.location.protocol.includes('-extension:')) {
+            setTimeout(() => window.close(), 200);
+          } else {
+            navigate('/', { replace: true });
+          }
+        }
+      } catch (e) {
+        console.error("AgregLLM: Error during token extraction", e);
+      }
+    }
+
+    // 2. Initialisation silencieuse et securisee de GDrive
     const initCloud = async () => {
       try {
         await gdrive.init();
@@ -156,7 +224,6 @@ function App() {
           const cloudData = await gdrive.loadFromDrive();
           if (cloudData) {
             storage.importData(cloudData);
-            // Declencher un evenement pour rafraichir l'UI
             window.dispatchEvent(new Event('storage'));
           }
         }
@@ -166,6 +233,13 @@ function App() {
     };
     
     initCloud();
+    
+    // Écouter les succès d'authentification pour recharger
+    const handleAuthSuccess = () => {
+      initCloud();
+    };
+    window.addEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
+    return () => window.removeEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
   }, []);
 
   return (
@@ -174,6 +248,8 @@ function App() {
         <Route path="/" element={<Welcome />} />
         <Route path="/conversations" element={<ConversationsList />} />
         <Route path="/settings" element={<Settings />} />
+        {/* Fallback pour éviter les pages blanches si le hash est inconnu */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
   )

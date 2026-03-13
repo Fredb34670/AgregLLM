@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AgregLLM",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Une extension pour agréger les discussions de vos LLM préférés.",
   "icons": {
     "16": "icon-192.png",
@@ -14,7 +14,8 @@
     "tabs",
     "activeTab",
     "scripting",
-    "notifications"
+    "notifications",
+    "identity"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -28,7 +29,11 @@
       "js": ["vendor/browser-polyfill.js", "scripts/content.js"]
     },
     {
-      "matches": ["http://localhost/*", "http://127.0.0.1/*", "https://fredb34670.github.io/AgregLLM/*"],
+      "matches": [
+        "http://localhost/*", 
+        "http://127.0.0.1/*", 
+        "https://fredb34670.github.io/AgregLLM/*"
+      ],
       "js": ["vendor/browser-polyfill.js", "scripts/sync.js"]
     }
   ],
@@ -42,7 +47,7 @@
     }
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval' https://accounts.google.com; object-src 'self'"
   },
   "web_accessible_resources": [
     {

@@ -275,7 +275,12 @@ async function saveConversation(data) {
         
         // Synchroniser avec localStorage de la webapp
         const tabs = await chrome.tabs.query({ 
-            url: ["https://fredb34670.github.io/AgregLLM/*", "*://localhost/*", "*://127.0.0.1/*"] 
+            url: [
+                "https://fredb34670.github.io/AgregLLM/*", 
+                "*://localhost/*", 
+                "*://127.0.0.1/*",
+                "chrome-extension://*/index.html*"
+            ] 
         });
         
         tabs.forEach(async (tab) => {
@@ -293,8 +298,25 @@ async function saveConversation(data) {
                 await chrome.scripting.executeScript({
                     target: { tabId: tab.id },
                     func: function(conversationsList) {
-                        localStorage.setItem('agregllm_conversations', JSON.stringify(conversationsList));
-                        console.log('AgregLLM: Conversations synchronized from extension', conversationsList.length);
+                        const currentData = localStorage.getItem('agregllm_conversations');
+                        let webConversations = currentData ? JSON.parse(currentData) : [];
+                        
+                        const mergedConversations = conversationsList.map(extConv => {
+                            const existing = webConversations.find(w => w.url === extConv.url);
+                            if (existing) {
+                                return {
+                                    ...extConv,
+                                    id: existing.id,
+                                    folderId: existing.folderId,
+                                    isFavorite: existing.isFavorite,
+                                    tags: extConv.tags && extConv.tags.length > 0 ? extConv.tags : existing.tags
+                                };
+                            }
+                            return extConv;
+                        });
+
+                        localStorage.setItem('agregllm_conversations', JSON.stringify(mergedConversations));
+                        console.log('AgregLLM: Conversations synchronized from extension', mergedConversations.length);
                         window.dispatchEvent(new Event('storage'));
                         window.dispatchEvent(new Event('agregllm-sync-complete'));
                     },

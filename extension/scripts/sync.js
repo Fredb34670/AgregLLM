@@ -1,9 +1,17 @@
 // sync.js - Synchronisation Finale Robuste
 
 async function syncData() {
+  console.log("AgregLLM Debug: syncData starting...");
   try {
-    const res = await browser.storage.local.get("conversations");
+    const api = (typeof browser !== 'undefined') ? browser : (typeof chrome !== 'undefined' ? chrome : null);
+    if (!api || !api.storage || !api.storage.local) {
+      console.error("AgregLLM Debug: extension storage API not found");
+      return;
+    }
+
+    const res = await api.storage.local.get("conversations");
     const extConversations = res.conversations || [];
+    console.log("AgregLLM Debug: found discussions in extension storage:", extConversations.length);
     if (extConversations.length === 0) return;
 
     const currentStorage = localStorage.getItem('agregllm_conversations');
@@ -18,10 +26,12 @@ async function syncData() {
         title: extConv.title,
         url: extConv.url,
         llm: extConv.llm,
-        capturedAt: new Date(extConv.date).getTime(),
+        capturedAt: existingIndex >= 0 && webConversations[existingIndex].capturedAt ? webConversations[existingIndex].capturedAt : new Date(extConv.date).getTime(),
         summary: extConv.summary || "",
         messages: extConv.messages || [],
-        tags: existingIndex >= 0 ? (webConversations[existingIndex].tags || []) : []
+        tags: existingIndex >= 0 ? (webConversations[existingIndex].tags || []) : [],
+        folderId: existingIndex >= 0 ? webConversations[existingIndex].folderId : undefined,
+        isFavorite: existingIndex >= 0 ? webConversations[existingIndex].isFavorite : false
       };
 
       // Si la discussion existe déjà, on vérifie si le contenu a changé
@@ -41,6 +51,33 @@ async function syncData() {
       localStorage.setItem('agregllm_conversations', JSON.stringify(webConversations));
       window.dispatchEvent(new CustomEvent('agregllm-sync-complete'));
       console.log("AgregLLM Sync: Données synchronisées.");
+    }
+
+    // Synchronisation des tokens d'authentification GDrive
+    const isExtensionPage = window.location.protocol.includes('-extension:');
+    
+    if (isExtensionPage) {
+        // Mode Extension Dashboard : On récupère le token depuis le stockage extension
+        const auth = await api.storage.local.get(["gdrive_token", "gdrive_expiry", "gdrive_user"]);
+        if (auth.gdrive_token && auth.gdrive_token !== localStorage.getItem('agregllm_gdrive_token')) {
+            console.log("AgregLLM Sync: Récupération du token depuis l'extension");
+            localStorage.setItem('agregllm_gdrive_token', auth.gdrive_token);
+            localStorage.setItem('agregllm_gdrive_expiry', auth.gdrive_expiry);
+            if (auth.gdrive_user) localStorage.setItem('agregllm_gdrive_user', auth.gdrive_user);
+            window.dispatchEvent(new CustomEvent('agregllm-gdrive-auth-success'));
+        }
+    } else {
+        // Mode Content Script (sur le site web) : On envoie le token vers le stockage extension
+        const token = localStorage.getItem('agregllm_gdrive_token');
+        if (token) {
+            const expiry = localStorage.getItem('agregllm_gdrive_expiry');
+            const user = localStorage.getItem('agregllm_gdrive_user');
+            await api.storage.local.set({ 
+                gdrive_token: token,
+                gdrive_expiry: expiry,
+                gdrive_user: user
+            });
+        }
     }
   } catch (e) {
     console.error("AgregLLM Sync Error", e);

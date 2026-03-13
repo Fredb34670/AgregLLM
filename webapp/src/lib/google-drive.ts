@@ -1,7 +1,7 @@
 // google-drive.ts - Service de synchronisation Cloud (V9 Stable)
 
-const CLIENT_ID = "895428232613-4p8st94hs6b0a7k2j7ftl3dglikdhs0f.apps.googleusercontent.com";
-const SCOPES = "https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email";
+const CLIENT_ID = "895428232613-4p8st94hs6boa7k2j7ft13dglikdhs0f.apps.googleusercontent.com";
+const SCOPES = "https://www.googleapis.com/auth/drive.appdata";
 
 class GoogleDriveService {
   private tokenClient: any = null;
@@ -11,22 +11,30 @@ class GoogleDriveService {
     if (this.initPromise) return this.initPromise;
 
     this.initPromise = new Promise<void>((resolve) => {
+      // Si GIS est déjà là
       if ((window as any).google?.accounts?.oauth2) {
         this.setupTokenClient();
         resolve();
         return;
       }
 
+      // Sinon on charge le script
       const script = document.createElement('script');
       script.id = 'gdrive-gis-script';
       script.src = "https://accounts.google.com/gsi/client";
       script.async = true;
       script.defer = true;
       script.onload = () => {
-        this.setupTokenClient();
+        // Petit délai pour laisser global 'google' s'enregistrer
+        setTimeout(() => {
+          this.setupTokenClient();
+          resolve();
+        }, 300);
+      };
+      script.onerror = () => {
+        console.error("AgregLLM: Failed to load Google GIS script");
         resolve();
       };
-      script.onerror = () => resolve();
       document.body.appendChild(script);
     });
 
@@ -34,12 +42,10 @@ class GoogleDriveService {
   }
 
   private setupTokenClient() {
-    if (!(window as any).google?.accounts?.oauth2) {
-      setTimeout(() => this.setupTokenClient(), 200);
-      return;
-    }
+    const oauth2 = (window as any).google?.accounts?.oauth2;
+    if (!oauth2) return;
 
-    this.tokenClient = (window as any).google.accounts.oauth2.initTokenClient({
+    this.tokenClient = oauth2.initTokenClient({
       client_id: CLIENT_ID,
       scope: SCOPES,
       callback: (response: any) => {
@@ -59,18 +65,55 @@ class GoogleDriveService {
   }
 
   login() {
-    if (this.tokenClient) {
-      this.tokenClient.requestAccessToken({ prompt: 'consent' });
+    console.log("AgregLLM Debug: Login requested");
+    const redirectUri = "https://fredb34670.github.io/AgregLLM/";
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` + 
+                    `client_id=${CLIENT_ID}&` + 
+                    `redirect_uri=${encodeURIComponent(redirectUri)}&` + 
+                    `response_type=token&` + 
+                    `scope=${encodeURIComponent(SCOPES)}&` + 
+                    `prompt=consent`;
+    
+    const isExtension = typeof window !== 'undefined' && 
+                       (window.location.protocol === 'chrome-extension:' || 
+                        window.location.protocol === 'moz-extension:');
+    
+    if (isExtension) {
+      console.log("AgregLLM Debug: Extension context, forcing separate window via browser.windows.create");
+      const api = (window as any).browser || (window as any).chrome;
+      if (api && api.windows && api.windows.create) {
+        // Cette méthode GARANTIT une fenêtre séparée (popup)
+        api.windows.create({
+          url: authUrl,
+          type: "popup",
+          width: 500,
+          height: 650
+        });
+        return;
+      }
     }
-    else {
-      this.init().then(() => this.tokenClient?.requestAccessToken({ prompt: 'consent' }));
-    }
+
+    // Fallback Web ou si l'API n'est pas dispo
+    window.open(authUrl, "AgregLLMAuth", "width=500,height=650,status=no,menubar=no,toolbar=no");
   }
 
   logout() {
     localStorage.removeItem('agregllm_gdrive_token');
     localStorage.removeItem('agregllm_gdrive_expiry');
+    localStorage.removeItem('agregllm_gdrive_user');
+    
+    // Déclencher un événement de synchronisation pour l'extension si présente
     window.dispatchEvent(new CustomEvent('agregllm-gdrive-auth-success'));
+    
+    // Notifier l'extension via le storage (détecté par sync.js)
+    const api = (window as any).browser || (window as any).chrome;
+    if (api && api.storage && api.storage.local) {
+       api.storage.local.set({ 
+           gdrive_token: null,
+           gdrive_expiry: null,
+           gdrive_user: null
+       });
+    }
   }
 
   isAuthenticated(): boolean {
