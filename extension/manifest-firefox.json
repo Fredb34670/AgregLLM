@@ -18,8 +18,6 @@
     "contextMenus",
     "tabs",
     "activeTab",
-    "notifications",
-    "identity",
     "<all_urls>"
   ],
   "background": {

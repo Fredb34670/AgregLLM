@@ -1,0 +1,34 @@
+{
+  "manifest_version": 2,
+  "name": "AgregLLM",
+  "version": "1.1.4",
+  "description": "Agrégateur de discussions LLM",
+  "icons": {
+    "16": "icon.svg",
+    "48": "icon.svg",
+    "128": "icon.svg"
+  },
+  "permissions": [
+    "storage",
+    "contextMenus",
+    "tabs",
+    "activeTab",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["vendor/browser-polyfill.js", "background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["vendor/browser-polyfill.js", "scripts/content.js"]
+    },
+    {
+      "matches": ["http://localhost/*", "http://127.0.0.1/*", "https://fredb34670.github.io/AgregLLM/*"],
+      "js": ["vendor/browser-polyfill.js", "scripts/sync.js"]
+    }
+  ],
+  "browser_action": {
+    "default_popup": "popup.html"
+  }
+}
