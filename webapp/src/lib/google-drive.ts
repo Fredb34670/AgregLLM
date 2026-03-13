@@ -43,6 +43,20 @@ class GoogleDriveService {
   }
 
   login() {
+    const isExtension = typeof window !== 'undefined' && 
+                       (window.location.protocol === 'chrome-extension:' || 
+                        window.location.protocol === 'moz-extension:');
+
+    if (isExtension) {
+      console.log("AgregLLM Debug: Extension context, delegating login to background script");
+      const api = (window as any).browser || (window as any).chrome;
+      if (api && api.runtime && api.runtime.sendMessage) {
+        api.runtime.sendMessage({ action: "google_login" });
+        return;
+      }
+    }
+
+    // Fallback Web classique (Popup GIS)
     if (this.tokenClient) {
       this.tokenClient.requestAccessToken({ prompt: 'consent' });
     }

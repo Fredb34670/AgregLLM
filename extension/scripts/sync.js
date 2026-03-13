@@ -106,3 +106,14 @@ browser.runtime.onMessage.addListener((msg) => {
 
 // Synchro initiale au chargement de la page
 syncData();
+
+// Écouter les changements dans le stockage extension pour synchroniser en temps réel
+if (typeof browser !== 'undefined' || typeof chrome !== 'undefined') {
+    const api = (typeof browser !== 'undefined') ? browser : chrome;
+    if (api && api.storage && api.storage.onChanged) {
+        api.storage.onChanged.addListener((changes) => {
+            console.log("AgregLLM Sync: Storage changes detected", Object.keys(changes));
+            syncData();
+        });
+    }
+}

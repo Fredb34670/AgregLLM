@@ -198,6 +198,59 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
             .catch((e) => sendResponse({ success: false, error: e.message }));
         return true; // Indique une réponse asynchrone
     }
+
+    if (message.action === "google_login") {
+        const CLIENT_ID = "895428232613-4p8st94hs6boa7k2j7ft13dglikdhs0f.apps.googleusercontent.com";
+        const SCOPES = "https://www.googleapis.com/auth/drive.appdata";
+        const redirectUri = "https://fredb34670.github.io/AgregLLM/";
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${encodeURIComponent(SCOPES)}&prompt=consent`;
+
+        // Créer une fenêtre séparée (popup) forçée
+        browser.windows.create({
+            url: authUrl,
+            type: "popup",
+            width: 500,
+            height: 650
+        }).then((window) => {
+            const tabId = window.tabs[0].id;
+            
+            // Écouteur pour capturer le retour
+            const onUpdated = async (updatedTabId, changeInfo, tab) => {
+                if (updatedTabId === tabId && tab.url && tab.url.includes(redirectUri) && tab.url.includes("access_token=")) {
+                    console.log("Token detected in background!");
+                    const url = new URL(tab.url.replace("#", "?")); // Transformer hash en params
+                    const token = url.searchParams.get("access_token");
+                    const expiresIn = url.searchParams.get("expires_in");
+                    
+                    if (token) {
+                        const expiry = Date.now() + (parseInt(expiresIn || "3600") * 1000);
+                        await browser.storage.local.set({
+                            gdrive_token: token,
+                            gdrive_expiry: expiry.toString()
+                        });
+                        console.log("Token saved to background storage");
+                        
+                        // Fermer la fenêtre
+                        browser.windows.remove(window.id);
+                        browser.tabs.onUpdated.removeListener(onUpdated);
+                        
+                        // Notifier l'émetteur
+                        sendResponse({ success: true });
+                    }
+                }
+            };
+            
+            browser.tabs.onUpdated.addListener(onUpdated);
+            
+            // Nettoyage si la fenêtre est fermée manuellement
+            browser.windows.onRemoved.addListener((windowId) => {
+                if (windowId === window.id) {
+                    browser.tabs.onUpdated.removeListener(onUpdated);
+                }
+            });
+        });
+        return true;
+    }
 });
 
 // Fonction utilitaire de sauvegarde centralisée
