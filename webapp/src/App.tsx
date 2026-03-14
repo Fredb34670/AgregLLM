@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -105,8 +105,43 @@ function Welcome() {
 }
 
 function App() {
+  const navigate = useNavigate();
+
   useEffect(() => {
-    // Initialisation silencieuse et securisee de GDrive
+    // 1. Détection du token OAuth dans le hash (retour de Google)
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token=')) {
+      try {
+        console.log("AgregLLM: OAuth token detected in hash, processing...");
+        // Extraction manuelle robuste
+        const tokenMatch = hash.match(/access_token=([^&]*)/);
+        const expiresMatch = hash.match(/expires_in=([^&]*)/);
+        const token = tokenMatch ? tokenMatch[1] : null;
+        const expiresIn = expiresMatch ? expiresMatch[1] : '3600';
+        
+        if (token) {
+          const expiry = Date.now() + (parseInt(expiresIn) * 1000);
+          localStorage.setItem('agregllm_gdrive_token', token);
+          localStorage.setItem('agregllm_gdrive_expiry', expiry.toString());
+          
+          // Déclencher le succès
+          window.dispatchEvent(new CustomEvent('agregllm-gdrive-auth-success'));
+          
+          // Si on est dans le popup "AgregLLMAuth", on le ferme tout de suite
+          if (window.name === "AgregLLMAuth" || !window.location.protocol.includes('-extension:')) {
+            console.log("AgregLLM: Success in popup, closing window...");
+            setTimeout(() => window.close(), 200);
+          } else {
+            // Sinon on nettoie l'URL (si on était sur la même page)
+            navigate('/', { replace: true });
+          }
+        }
+      } catch (e) {
+        console.error("AgregLLM: Error parsing OAuth hash", e);
+      }
+    }
+
+    // 2. Initialisation silencieuse et securisee de GDrive
     const initCloud = async () => {
       try {
         await gdrive.init();
@@ -115,7 +150,6 @@ function App() {
           const cloudData = await gdrive.loadFromDrive();
           if (cloudData) {
             storage.importData(cloudData);
-            // Declencher un evenement pour rafraichir l'UI
             window.dispatchEvent(new Event('storage'));
           }
         }
@@ -125,7 +159,7 @@ function App() {
     };
     
     initCloud();
-  }, []);
+  }, [navigate]);
 
   return (
     <Layout>

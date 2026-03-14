@@ -43,23 +43,29 @@ class GoogleDriveService {
   }
 
   login() {
-    const isExtension = typeof window !== 'undefined' && 
-                       (window.location.protocol === 'chrome-extension:' || 
-                        window.location.protocol === 'moz-extension:');
-
-    if (isExtension) {
-      console.log("AgregLLM Debug: Extension context, delegating login to background script");
-      const api = (window as any).browser || (window as any).chrome;
-      if (api && api.runtime && api.runtime.sendMessage) {
-        api.runtime.sendMessage({ action: "google_login" });
-        return;
-      }
-    }
-
-    // Fallback Web classique (Popup GIS)
-    if (this.tokenClient) {
-      this.tokenClient.requestAccessToken({ prompt: 'consent' });
-    }
+    console.log("AgregLLM Debug: Login requested via forced native window");
+    
+    // On construit l'URL de connexion manuellement pour avoir un contrôle total
+    const redirectUri = "https://fredb34670.github.io/AgregLLM/";
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` + 
+                    `client_id=${CLIENT_ID}&` + 
+                    `redirect_uri=${encodeURIComponent(redirectUri)}&` + 
+                    `response_type=token&` + 
+                    `scope=${encodeURIComponent(SCOPES)}&` + 
+                    `prompt=consent`;
+    
+    // Paramètres pour forcer une "fenêtre" et non un onglet
+    const width = 500;
+    const height = 650;
+    const left = (window.screen.width / 2) - (width / 2);
+    const top = (window.screen.height / 2) - (height / 2);
+    
+    // On donne un nom spécifique pour que App.tsx puisse reconnaître la fenêtre et la fermer
+    window.open(
+      authUrl, 
+      "AgregLLMAuth", 
+      `width=${width},height=${height},left=${left},top=${top},status=no,menubar=no,toolbar=no,location=yes,scrollbars=yes,resizable=yes`
+    );
   }
 
   logout() {
