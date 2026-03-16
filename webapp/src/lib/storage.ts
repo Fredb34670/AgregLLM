@@ -6,13 +6,15 @@ const STORAGE_KEY_FOLDERS = 'agregllm_folders';
 
 // Helper pour déclencher auto-sync après modification
 const triggerAutoSync = () => {
-  // Import dynamique pour éviter les dépendances circulaires
+  // Désactivé pour le développement local
+  /*
   import('./google-drive').then(({ gdrive }) => {
     const data = storage.exportData();
     gdrive.autoSync(data);
   }).catch(() => {
     // Ignore si le module n'est pas disponible
   });
+  */
 };
 
 export const storage = {
