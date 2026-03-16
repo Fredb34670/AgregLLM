@@ -9,3 +9,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: Polissage et Améliorations AgregLLM**
   *Link: [./tracks/agregllm_polishing_20260118/](./tracks/agregllm_polishing_20260118/)*
+
+---
+
+- [ ] **Track: Correction de la perte de dossiers lors du redémarrage de l'extension et configuration de l'environnement de test local.**
+*Link: [./tracks/fix_folders_persistence_20260316/](./tracks/fix_folders_persistence_20260316/)*
