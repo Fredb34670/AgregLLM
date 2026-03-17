@@ -30,7 +30,14 @@ async function syncData() {
 
       // Si la discussion existe déjà, on vérifie si le contenu a changé
       if (existing) {
-        if (JSON.stringify(webConversations[existingIndex].messages) !== JSON.stringify(newData.messages)) {
+        // On compare l'objet complet sans les métadonnées spécifiques à la webapp
+        const currentData = webConversations[existingIndex];
+        const hasStructuralChanges = 
+          currentData.title !== newData.title ||
+          currentData.summary !== newData.summary ||
+          JSON.stringify(currentData.messages) !== JSON.stringify(newData.messages);
+
+        if (hasStructuralChanges) {
           webConversations[existingIndex] = newData;
           hasChanges = true;
         }

@@ -230,38 +230,18 @@ async function saveConversation(data) {
         await browser.storage.local.set({ conversations: list });
         console.log("Successfully saved to storage!");
         
-        // Synchroniser aussi avec localStorage pour la webapp
-        // Notification Webapp (GitHub Pages et localhost en dev)
+        // Notifier la Webapp qu'une synchronisation est nécessaire
         const tabs = await browser.tabs.query({ 
             url: ["https://fredb34670.github.io/AgregLLM/*", "*://localhost/*", "*://127.0.0.1/*"] 
         });
         
-        // Injecter un script pour mettre à jour le localStorage de la webapp
         tabs.forEach(async (tab) => {
             try {
-                const code = `
-                    (function() {
-                        const conversations = ${JSON.stringify(list)};
-                        localStorage.setItem('agregllm_conversations', JSON.stringify(conversations));
-                        console.log('AgregLLM: Conversations synchronized from extension', conversations.length);
-                        // Déclencher un événement pour que l'app se rafraîchisse
-                        window.dispatchEvent(new Event('storage'));
-                        window.dispatchEvent(new Event('agregllm-sync-complete'));
-                    })();
-                `;
-                
-                if (browser.scripting && browser.scripting.executeScript) {
-                    await browser.scripting.executeScript({
-                        target: { tabId: tab.id },
-                        code: code
-                    });
-                } else if (browser.tabs.executeScript) {
-                    await browser.tabs.executeScript(tab.id, { code: code });
-                }
-                
-                console.log("Synchronized with webapp tab:", tab.id);
+                // Envoyer un message au script de contenu (sync.js) injecté dans la webapp
+                await browser.tabs.sendMessage(tab.id, { action: "sync" });
+                console.log("Sync message sent to webapp tab:", tab.id);
             } catch (e) {
-                console.log("Could not sync with tab:", tab.id, e.message);
+                console.log("Could not send sync message to tab:", tab.id, e.message);
             }
         });
         

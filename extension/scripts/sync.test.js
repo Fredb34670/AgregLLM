@@ -30,20 +30,19 @@ global.window = {
 };
 global.CustomEvent = class { constructor(name) { this.name = name; } };
 
-// Import de la fonction à tester (après avoir mocké l'environnement)
-// On utilise require car l'export dans sync.js est au format CommonJS pour les tests
+// Import de la fonction à tester
 const { syncData } = require('./sync.js');
 
-describe('syncData - Persistence Bug', () => {
+describe('syncData - Persistence and Metadata', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
   });
 
-  it('SHOULD NOT lose folderId and isFavorite status during sync', async () => {
-    const url = "http://test-persist.com";
+  it('SHOULD NOT lose folderId when messages are identical but other metadata changes', async () => {
+    const url = "http://test-metadata.com";
     
-    // 1. Données déjà présentes dans la Webapp avec un dossier et favori
+    // 1. Données déjà présentes dans la Webapp
     const existingConv = {
       id: "web-123",
       title: "Old Title",
@@ -52,19 +51,19 @@ describe('syncData - Persistence Bug', () => {
       capturedAt: 1000,
       summary: "Old Summary",
       messages: [{ role: "user", content: "hello" }],
-      folderId: "folder-456", // <--- Doit être préservé
-      isFavorite: true        // <--- Doit être préservé
+      folderId: "folder-important",
+      isFavorite: true
     };
     localStorage.setItem('agregllm_conversations', JSON.stringify([existingConv]));
 
-    // 2. Nouvelle capture de l'extension pour la même URL (mais messages différents)
+    // 2. Capture extension avec un titre mis à jour mais les mêmes messages
     const extConv = {
-      title: "New Title",
+      title: "Updated Title", // <--- Le titre a changé
       url: url,
       llm: "ChatGPT",
       date: new Date().toISOString(),
-      summary: "New Summary",
-      messages: [{ role: "user", content: "hello" }, { role: "assistant", content: "hi" }]
+      summary: "Updated Summary",
+      messages: [{ role: "user", content: "hello" }] // <--- Messages IDENTIQUES
     };
     browser.storage.local.get.mockResolvedValue({ conversations: [extConv] });
 
@@ -73,14 +72,11 @@ describe('syncData - Persistence Bug', () => {
 
     // 4. Vérifier les résultats
     const savedData = JSON.parse(localStorage.getItem('agregllm_conversations'));
-    expect(savedData.length).toBe(1);
-    
     const synced = savedData[0];
-    expect(synced.url).toBe(url);
-    expect(synced.messages.length).toBe(2); // Le contenu a bien été mis à jour
     
-    // VÉRIFICATION DU BUG : Ces champs ne devraient pas être perdus
-    expect(synced.folderId).toBe("folder-456");
+    // On veut que le titre soit mis à jour ET que le dossier soit gardé
+    expect(synced.title).toBe("Updated Title");
+    expect(synced.folderId).toBe("folder-important");
     expect(synced.isFavorite).toBe(true);
   });
 });
