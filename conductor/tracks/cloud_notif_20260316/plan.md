@@ -19,4 +19,4 @@ L'objectif est d'intégrer le bandeau dans la liste principale des conversations
 
 - [x] Task: Insérer `CloudNotificationBanner` dans `ConversationsList.tsx` au-dessus des filtres.
 - [x] Task: Ajouter des tests d'intégration pour vérifier l'apparition/disparition du bandeau selon l'état de connexion.
-- [x] Task: Conductor - User Manual Verification 'Integration and Visibility Logic' (Protocol in workflow.md) [471ffee]
+- [x] Task: Conductor - User Manual Verification 'Integration and Visibility Logic' (Protocol in workflow.md) [471ffee, ca95da9]
