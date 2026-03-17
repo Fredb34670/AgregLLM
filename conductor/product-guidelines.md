@@ -13,6 +13,7 @@ Ce document définit les principes fondamentaux qui guident la conception, le d�
 ## 3. Expérience Utilisateur (UX)
 - **Simplicité et Efficacité :** Chaque fonctionnalité sera conçue pour réduire au minimum le nombre d'actions requises. L'interface doit être intuitive et ne pas surcharger l'utilisateur.
 - **Feedback Immédiat :** L'application doit fournir des retours visuels clairs et instantanés pour chaque action de l'utilisateur (sauvegarde, erreur, chargement), afin qu'il sache toujours ce qu'il se passe.
+- **Transparence de Synchronisation :** L'utilisateur doit être informé en permanence de son état de connexion au cloud (connecté vs local uniquement) pour éviter toute confusion sur la disponibilité de ses données.
 - **Onboarding :** L'approche est celle de l'**onboarding minimaliste**. L'application doit être conçue de manière si intuitive que l'utilisateur peut la maîtriser sans avoir besoin de tutoriels complexes.
 
 ## 4. Gestion des Données et Confidentialité
