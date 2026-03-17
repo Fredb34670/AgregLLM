@@ -12,5 +12,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Notification de connexion Cloud (Note d'information si déconnecté)**
+- [x] **Track: Notification de connexion Cloud (Note d'information si déconnecté)**
   *Link: [./tracks/cloud_notif_20260316/](./tracks/cloud_notif_20260316/)*
