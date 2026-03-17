@@ -12,5 +12,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Correction de la régression de l'écrasement des dossiers par l'extension.**
+- [x] **Track: Correction de la régression de l'écrasement des dossiers par l'extension.**
 *Link: [./tracks/fix_folders_regression_20260317/](./tracks/fix_folders_regression_20260317/)*
