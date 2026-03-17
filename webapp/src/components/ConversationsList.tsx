@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { CloudNotificationBanner } from './CloudNotificationBanner';
 import {
     Search, 
     Trash2, 
@@ -108,6 +109,7 @@ export function ConversationsList() {
 
   return (
     <div className="space-y-6">
+      <CloudNotificationBanner />
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div className="space-y-1">
           <h2 className="text-3xl font-bold tracking-tight">
