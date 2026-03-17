@@ -11,6 +11,7 @@ import { gdrive } from './lib/google-drive';
 import { Conversation } from './types';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Sidebar } from './components/Sidebar';
+import { CloudNotificationBanner } from './components/CloudNotificationBanner';
 import { MessageSquare, BarChart3, PieChart } from 'lucide-react';
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         </header>
         <ScrollArea className="flex-1">
           <div className="p-6 max-w-6xl mx-auto w-full">
+            <CloudNotificationBanner />
             {children}
           </div>
         </ScrollArea>

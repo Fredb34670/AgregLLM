@@ -28,42 +28,6 @@ vi.mock('../lib/cloud-status', () => ({
 describe('ConversationsList', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useCloudStatus as any).mockReturnValue({
-      isConnected: true,
-      login: vi.fn(),
-    });
-  });
-
-  it('affiche le bandeau de notification cloud quand déconnecté', () => {
-    (useCloudStatus as any).mockReturnValue({
-      isConnected: false,
-      login: vi.fn(),
-    });
-    vi.mocked(storage.getAllConversations).mockReturnValue([]);
-    
-    render(
-      <MemoryRouter>
-        <ConversationsList />
-      </MemoryRouter>
-    );
-    
-    expect(screen.getByText(/Attention : discussions sauvegardées localement/i)).toBeInTheDocument();
-  });
-
-  it('n\'affiche pas le bandeau de notification cloud quand connecté', () => {
-    (useCloudStatus as any).mockReturnValue({
-      isConnected: true,
-      login: vi.fn(),
-    });
-    vi.mocked(storage.getAllConversations).mockReturnValue([]);
-    
-    render(
-      <MemoryRouter>
-        <ConversationsList />
-      </MemoryRouter>
-    );
-    
-    expect(screen.queryByText(/Attention : discussions sauvegardées localement/i)).not.toBeInTheDocument();
   });
 
   it('affiche un message quand il n\'y a pas de conversations', () => {

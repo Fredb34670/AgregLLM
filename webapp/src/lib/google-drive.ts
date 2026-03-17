@@ -70,6 +70,7 @@ class GoogleDriveService {
   logout() {
     localStorage.removeItem('agregllm_gdrive_token');
     localStorage.removeItem('agregllm_gdrive_expiry');
+    localStorage.removeItem('agregllm_gdrive_user');
     window.dispatchEvent(new CustomEvent('agregllm-gdrive-auth-success'));
   }
 

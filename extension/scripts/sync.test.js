@@ -15,20 +15,12 @@ global.browser = {
   }
 };
 
-// Simuler localStorage
-let localDataStore = {};
-global.localStorage = {
-  getItem: vi.fn((key) => localDataStore[key] || null),
-  setItem: vi.fn((key, value) => { localDataStore[key] = value; }),
-  clear: () => { localDataStore = {}; }
-};
-
 // Simuler window et CustomEvent
 global.window = {
   dispatchEvent: vi.fn(),
   addEventListener: vi.fn()
-};
-global.CustomEvent = class { constructor(name) { this.name = name; } };
+} as any;
+global.CustomEvent = class { constructor(name: string) { (this as any).name = name; } } as any;
 
 // Import de la fonction à tester
 const { syncData } = require('./sync.js');
@@ -58,23 +50,22 @@ describe('syncData - Persistence and Metadata', () => {
 
     // 2. Capture extension avec un titre mis à jour mais les mêmes messages
     const extConv = {
-      title: "Updated Title", // <--- Le titre a changé
+      title: "Updated Title",
       url: url,
       llm: "ChatGPT",
       date: new Date().toISOString(),
       summary: "Updated Summary",
-      messages: [{ role: "user", content: "hello" }] // <--- Messages IDENTIQUES
+      messages: [{ role: "user", content: "hello" }]
     };
-    browser.storage.local.get.mockResolvedValue({ conversations: [extConv] });
+    (browser.storage.local.get as any).mockResolvedValue({ conversations: [extConv] });
 
     // 3. Exécuter la synchronisation
     await syncData();
 
     // 4. Vérifier les résultats
-    const savedData = JSON.parse(localStorage.getItem('agregllm_conversations'));
+    const savedData = JSON.parse(localStorage.getItem('agregllm_conversations') || '[]');
     const synced = savedData[0];
     
-    // On veut que le titre soit mis à jour ET que le dossier soit gardé
     expect(synced.title).toBe("Updated Title");
     expect(synced.folderId).toBe("folder-important");
     expect(synced.isFavorite).toBe(true);
