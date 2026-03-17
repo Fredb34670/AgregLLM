@@ -9,8 +9,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: Polissage et Améliorations AgregLLM**
   *Link: [./tracks/agregllm_polishing_20260118/](./tracks/agregllm_polishing_20260118/)*
-
----
-
-- [x] **Track: Correction de la régression de l'écrasement des dossiers par l'extension.**
-*Link: [./tracks/fix_folders_regression_20260317/](./tracks/fix_folders_regression_20260317/)*
