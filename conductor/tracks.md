@@ -9,8 +9,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: Polissage et Améliorations AgregLLM**
   *Link: [./tracks/agregllm_polishing_20260118/](./tracks/agregllm_polishing_20260118/)*
-
----
-
-- [x] **Track: Notification de connexion Cloud (Note d'information si déconnecté)**
-  *Link: [./tracks/cloud_notif_20260316/](./tracks/cloud_notif_20260316/)*
