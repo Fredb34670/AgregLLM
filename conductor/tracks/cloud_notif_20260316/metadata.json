@@ -1,0 +1,8 @@
+{
+  "track_id": "cloud_notif_20260316",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-03-16T12:00:00Z",
+  "updated_at": "2026-03-16T12:00:00Z",
+  "description": "Après un test pour savoir si l'utilisateur est connecté au cloud via l'application, si ce n'est pas le cas, afficher une note d'information qui notifie qu'en n'étant pas connecté au cloud ou au compte google, les liens ne seront sauvegardés qu'en local et ne seront donc pas disponible sur une autre machine."
+}
