@@ -1,0 +1,8 @@
+{
+  "track_id": "fix_folders_regression_20260317",
+  "type": "bug",
+  "status": "new",
+  "created_at": "2026-03-17T10:00:00Z",
+  "updated_at": "2026-03-17T10:00:00Z",
+  "description": "Correction du bug où l'extension écrase les dossiers de la Webapp lors d'une nouvelle capture."
+}
