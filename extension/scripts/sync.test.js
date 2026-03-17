@@ -1,57 +1,86 @@
-// Fichier de test pour le script de synchronisation
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-function assert(condition, message) {
-  if (!condition) {
-    throw new Error(message || "Assertion failed");
-  }
-}
-
-async function testSyncData() {
-  console.log("Running tests for syncData...");
-
-  // Mock browser.storage.local
-  const mockExtConversations = [
-    { title: "Test Ext", url: "http://test.com", llm: "ChatGPT", date: new Date().toISOString() }
-  ];
-  
-  global.browser = {
-    storage: {
-      local: {
-        get: vi.fn().mockResolvedValue({ conversations: mockExtConversations }),
-        set: vi.fn().mockResolvedValue(undefined)
-      }
-    },
-    runtime: {
-      onMessage: {
-        addListener: vi.fn()
-      }
+// Simuler browser
+global.browser = {
+  storage: {
+    local: {
+      get: vi.fn(),
+      set: vi.fn()
     }
-  };
+  },
+  runtime: {
+    onMessage: {
+      addListener: vi.fn()
+    }
+  }
+};
 
-  // Mock localStorage
-  let localData = null;
-  global.localStorage = {
-    getItem: vi.fn().mockReturnValue(null),
-    setItem: vi.fn((key, val) => { localData = JSON.parse(val); })
-  };
+// Simuler localStorage
+let localDataStore = {};
+global.localStorage = {
+  getItem: vi.fn((key) => localDataStore[key] || null),
+  setItem: vi.fn((key, value) => { localDataStore[key] = value; }),
+  clear: () => { localDataStore = {}; }
+};
 
-  // Mock CustomEvent et dispatchEvent
-  global.CustomEvent = class { constructor(name) { this.name = name; } };
-  global.window = {
-    dispatchEvent: vi.fn(),
-    addEventListener: vi.fn(),
-    localStorage: global.localStorage
-  };
+// Simuler window et CustomEvent
+global.window = {
+  dispatchEvent: vi.fn(),
+  addEventListener: vi.fn()
+};
+global.CustomEvent = class { constructor(name) { this.name = name; } };
 
-  // Exécution de syncData (il faudrait l'exporter ou l'extraire pour le tester vraiment proprement)
-  // Ici on simule ce qu'il devrait faire
-  await syncData();
+// Import de la fonction à tester (après avoir mocké l'environnement)
+// On utilise require car l'export dans sync.js est au format CommonJS pour les tests
+const { syncData } = require('./sync.js');
 
-  assert(localData !== null, "Les données devraient être sauvegardées dans localStorage.");
-  assert(localData.length === 1, "Il devrait y avoir une conversation synchronisée.");
-  assert(localData[0].title === "Test Ext", "Le titre synchronisé est incorrect.");
+describe('syncData - Persistence Bug', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+  });
 
-  console.log("  PASS: syncData a synchronisé les données correctement.");
-}
+  it('SHOULD NOT lose folderId and isFavorite status during sync', async () => {
+    const url = "http://test-persist.com";
+    
+    // 1. Données déjà présentes dans la Webapp avec un dossier et favori
+    const existingConv = {
+      id: "web-123",
+      title: "Old Title",
+      url: url,
+      llm: "ChatGPT",
+      capturedAt: 1000,
+      summary: "Old Summary",
+      messages: [{ role: "user", content: "hello" }],
+      folderId: "folder-456", // <--- Doit être préservé
+      isFavorite: true        // <--- Doit être préservé
+    };
+    localStorage.setItem('agregllm_conversations', JSON.stringify([existingConv]));
 
-console.log("Ce fichier de test est descriptif (mocké pour illustrer la logique).");
+    // 2. Nouvelle capture de l'extension pour la même URL (mais messages différents)
+    const extConv = {
+      title: "New Title",
+      url: url,
+      llm: "ChatGPT",
+      date: new Date().toISOString(),
+      summary: "New Summary",
+      messages: [{ role: "user", content: "hello" }, { role: "assistant", content: "hi" }]
+    };
+    browser.storage.local.get.mockResolvedValue({ conversations: [extConv] });
+
+    // 3. Exécuter la synchronisation
+    await syncData();
+
+    // 4. Vérifier les résultats
+    const savedData = JSON.parse(localStorage.getItem('agregllm_conversations'));
+    expect(savedData.length).toBe(1);
+    
+    const synced = savedData[0];
+    expect(synced.url).toBe(url);
+    expect(synced.messages.length).toBe(2); // Le contenu a bien été mis à jour
+    
+    // VÉRIFICATION DU BUG : Ces champs ne devraient pas être perdus
+    expect(synced.folderId).toBe("folder-456");
+    expect(synced.isFavorite).toBe(true);
+  });
+});

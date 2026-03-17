@@ -12,20 +12,24 @@ async function syncData() {
 
     extConversations.forEach(extConv => {
       const existingIndex = webConversations.findIndex(web => web.url === extConv.url);
+      const existing = existingIndex >= 0 ? webConversations[existingIndex] : null;
       
       const newData = {
-        id: existingIndex >= 0 ? webConversations[existingIndex].id : `ext-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: existing ? existing.id : `ext-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         title: extConv.title,
         url: extConv.url,
         llm: extConv.llm,
         capturedAt: new Date(extConv.date).getTime(),
         summary: extConv.summary || "",
         messages: extConv.messages || [],
-        tags: existingIndex >= 0 ? (webConversations[existingIndex].tags || []) : []
+        // On préserve les métadonnées existantes de la Webapp
+        tags: existing ? (existing.tags || []) : (extConv.tags || []),
+        folderId: existing ? existing.folderId : undefined,
+        isFavorite: existing ? existing.isFavorite : false
       };
 
       // Si la discussion existe déjà, on vérifie si le contenu a changé
-      if (existingIndex >= 0) {
+      if (existing) {
         if (JSON.stringify(webConversations[existingIndex].messages) !== JSON.stringify(newData.messages)) {
           webConversations[existingIndex] = newData;
           hasChanges = true;
@@ -69,3 +73,8 @@ browser.runtime.onMessage.addListener((msg) => {
 
 // Synchro initiale au chargement de la page
 syncData();
+
+// Export pour les tests
+if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+  module.exports = { syncData };
+}
