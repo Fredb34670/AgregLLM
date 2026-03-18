@@ -9,3 +9,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: Polissage et Améliorations AgregLLM**
   *Link: [./tracks/agregllm_polishing_20260118/](./tracks/agregllm_polishing_20260118/)*
+
+---
+
+- [ ] **Track: Automatisation de la synchronisation et Info-bulle (Tooltip)**
+  *Link: [./tracks/auto_sync_ui_20260317/](./tracks/auto_sync_ui_20260317/)*

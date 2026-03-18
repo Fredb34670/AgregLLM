@@ -1,4 +1,4 @@
-# Track cloud_notif_20260316 Context
+# Track auto_sync_ui_20260317 Context
 
 - [Specification](./spec.md)
 - [Implementation Plan](./plan.md)
