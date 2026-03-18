@@ -8,10 +8,10 @@ L'objectif est de rendre la synchronisation bidirectionnelle automatique.
 - [x] Task: Ajouter des tests unitaires pour vérifier que `triggerAutoSync` appelle bien le service Google Drive. [d89df9b]
 - [x] Task: Conductor - User Manual Verification 'Automation Logic' (Protocol in workflow.md) [d89df9b]
 
-## Phase 2: UI Enhancements (Tooltip)
+## Phase 2: UI Enhancements (Tooltip) [checkpoint: d6428e7]
 L'objectif est d'améliorer l'UX avec une info-bulle sur le bouton de synchronisation.
 
-- [ ] Task: Installer et configurer le composant `Tooltip` de Shadcn UI si nécessaire.
-- [ ] Task: Ajouter le `Tooltip` au bouton "Sync" dans `webapp/src/components/Settings.tsx` avec le message spécifié.
-- [ ] Task: Ajouter des tests unitaires pour vérifier la présence du Tooltip.
-- [ ] Task: Conductor - User Manual Verification 'UI Enhancements (Tooltip)' (Protocol in workflow.md)
+- [x] Task: Installer et configurer le composant `Tooltip` de Shadcn UI si nécessaire. [d89df9b]
+- [x] Task: Ajouter le `Tooltip` au bouton "Sync" dans `webapp/src/components/Settings.tsx` avec le message spécifié. [d89df9b]
+- [x] Task: Ajouter des tests unitaires pour vérifier la présence du Tooltip. [d89df9b]
+- [x] Task: Conductor - User Manual Verification 'UI Enhancements (Tooltip)' (Protocol in workflow.md) [d6428e7]
