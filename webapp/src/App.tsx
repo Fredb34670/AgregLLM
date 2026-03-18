@@ -168,6 +168,26 @@ function App() {
     };
     
     initCloud();
+
+    // Écouter les connexions réussies pour charger les données immédiatement
+    const handleAuthSuccess = async () => {
+      console.log("AgregLLM: Auth success detected, triggering sync...");
+      try {
+        const cloudData = await gdrive.loadFromDrive();
+        if (cloudData) {
+          storage.importData(cloudData);
+          // Déclencher un événement pour rafraîchir l'UI
+          window.dispatchEvent(new Event('storage'));
+        }
+      } catch (e) {
+        console.error("AgregLLM: Auto-load after auth failed", e);
+      }
+    };
+
+    window.addEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
+    return () => {
+      window.removeEventListener('agregllm-gdrive-auth-success', handleAuthSuccess);
+    };
   }, []);
 
   return (
