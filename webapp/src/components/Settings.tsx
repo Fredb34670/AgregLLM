@@ -5,6 +5,11 @@ import { storage } from "../lib/storage";
 import { gdrive } from "../lib/google-drive";
 import { Trash2, Edit2, Cloud, RefreshCw } from "lucide-react";
 import { useRef, useState, useMemo, useEffect } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function Settings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -106,9 +111,16 @@ export function Settings() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button onClick={handleSyncNow} disabled={isSyncing} variant="outline" size="sm">
-                  <RefreshCw className={isSyncing ? "animate-spin" : ""} /> Sync.
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={handleSyncNow} disabled={isSyncing} variant="outline" size="sm">
+                      <RefreshCw className={isSyncing ? "animate-spin" : ""} /> Sync.
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Synchronisation manuelle forcée, Mettre à jour maintenant</p>
+                  </TooltipContent>
+                </Tooltip>
                 <Button onClick={() => { gdrive.logout(); setUserInfo(null); }} variant="ghost" size="sm" className="text-destructive">
                   Déconnexion
                 </Button>

@@ -13,6 +13,7 @@ import { ThemeToggle } from './components/ThemeToggle';
 import { Sidebar } from './components/Sidebar';
 import { CloudNotificationBanner } from './components/CloudNotificationBanner';
 import { MessageSquare, BarChart3, PieChart } from 'lucide-react';
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -191,13 +192,15 @@ function App() {
   }, []);
 
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<Welcome />} />
-        <Route path="/conversations" element={<ConversationsList />} />
-        <Route path="/settings" element={<Settings />} />
-      </Routes>
-    </Layout>
+    <TooltipProvider>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Welcome />} />
+          <Route path="/conversations" element={<ConversationsList />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </Layout>
+    </TooltipProvider>
   )
 }
 
