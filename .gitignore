@@ -9,6 +9,8 @@ extension/node_modules/
 # Build artifacts (ne pas commit les builds locaux)
 dist-extensions/
 webapp/dist/
+webapp/coverage/
+extension/assets/
 
 # Temporary files
 tmp_*
