@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ConversationsList } from './ConversationsList';
 import { storage } from '../lib/storage';
-import { useCloudStatus } from '../lib/cloud-status';
+// import { useCloudStatus } from '../lib/cloud-status';
 
 vi.mock('framer-motion', () => ({
   motion: {

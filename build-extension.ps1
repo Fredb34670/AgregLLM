@@ -45,7 +45,9 @@ foreach ($file in $files) {
 # Copier les dossiers
 foreach ($folder in $folders) {
     if (Test-Path "extension/$folder") {
-        Copy-Item "extension/$folder" "$firefoxDir/$folder" -Recurse
+        $dest = "$firefoxDir/$folder"
+        New-Item -ItemType Directory -Path $dest -Force | Out-Null
+        Copy-Item "extension/$folder/*" "$dest" -Recurse -Exclude "*.test.js" -Force
     }
 }
 
@@ -79,7 +81,9 @@ foreach ($file in $files) {
 # Copier les dossiers (Chrome n'a pas besoin du polyfill dans le background)
 foreach ($folder in $folders) {
     if (Test-Path "extension/$folder") {
-        Copy-Item "extension/$folder" "$chromeDir/$folder" -Recurse
+        $dest = "$chromeDir/$folder"
+        New-Item -ItemType Directory -Path $dest -Force | Out-Null
+        Copy-Item "extension/$folder/*" "$dest" -Recurse -Exclude "*.test.js" -Force
     }
 }
 
