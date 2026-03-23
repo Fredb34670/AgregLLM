@@ -15,7 +15,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Automatisation de la synchronisation et Info-bulle (Tooltip)**
   *Link: [./archive/auto_sync_ui_20260317/](./archive/auto_sync_ui_20260317/)*
 
----
-
 - [x] **Track: Correction de la page blanche lors de l'ouverture de l'application via l'extension**
-  *Link: [./tracks/fix_white_page_20260323/](./tracks/fix_white_page_20260323/)*
+  *Link: [./archive/fix_white_page_20260323/](./archive/fix_white_page_20260323/)*
