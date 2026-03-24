@@ -27,6 +27,10 @@ export function ConversationsList() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
 
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const currentFolderId = query.get('folder');
+
   const refreshData = () => {
     setConversations(storage.getAllConversations());
     setFolders(storage.getAllFolders());
