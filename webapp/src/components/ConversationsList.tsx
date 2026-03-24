@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     Search, 
     Trash2, 
+    Pencil,
     Folder as FolderIcon,
     Star
   } from 'lucide-react';
@@ -22,13 +23,40 @@ export function ConversationsList() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   
-  const location = useLocation();
-  const query = new URLSearchParams(location.search);
-  const currentFolderId = query.get('folder');
+  // État pour l'édition du titre
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
 
   const refreshData = () => {
     setConversations(storage.getAllConversations());
     setFolders(storage.getAllFolders());
+  };
+
+  const handleEditStart = (e: React.MouseEvent, conversation: Conversation) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setEditingId(conversation.id);
+    setEditTitle(conversation.title);
+  };
+
+  const handleEditSave = (id: string) => {
+    if (editTitle.trim()) {
+      storage.updateConversationTitle(id, editTitle.trim());
+      refreshData();
+    }
+    setEditingId(null);
+  };
+
+  const handleEditCancel = () => {
+    setEditingId(null);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, id: string) => {
+    if (e.key === 'Enter') {
+      handleEditSave(id);
+    } else if (e.key === 'Escape') {
+      handleEditCancel();
+    }
   };
 
   const currentFolder = useMemo(() => {
@@ -204,15 +232,29 @@ export function ConversationsList() {
                         >
                           <Star className={`h-5 w-5 ${conv.isFavorite ? 'fill-current' : ''}`} />
                         </button>
-                        <CardTitle className="text-lg font-bold truncate group-hover/card:text-primary transition-colors">
-                          {conv.title}
-                        </CardTitle>
+                        
+                        {editingId === conv.id ? (
+                          <Input
+                            autoFocus
+                            className="h-8 flex-1"
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            onKeyDown={(e) => handleKeyDown(e, conv.id)}
+                            onBlur={() => handleEditSave(conv.id)}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                          />
+                        ) : (
+                          <CardTitle className="text-lg font-bold truncate group-hover/card:text-primary transition-colors">
+                            {conv.title}
+                          </CardTitle>
+                        )}
+                        
                         <Badge variant="outline" className="bg-primary/10 text-primary font-bold border-primary/30 shrink-0 text-[10px] px-2 py-0 h-5">
                           {conv.llm}
                         </Badge>
                       </div>
                       
-                      <div className="flex items-center gap-3 shrink-0 mr-12 h-full">
+                      <div className="flex items-center gap-3 shrink-0 mr-20 h-full">
                         <p className="text-xs text-muted-foreground font-semibold whitespace-nowrap self-center">
                           {new Date(conv.date || conv.capturedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
@@ -220,7 +262,7 @@ export function ConversationsList() {
                     </CardHeader>
                     <CardContent>
                       {conv.summary && (
-                        <p className="text-sm text-muted-foreground line-clamp-3 mb-4 italic leading-relaxed">
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-4 italic leading-relaxed">
                           "{conv.summary}"
                         </p>
                       )}
@@ -243,15 +285,26 @@ export function ConversationsList() {
                   </Card>
                 </a>
                 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-3 top-[18px] opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8"
-                  onClick={(e) => handleDelete(e, conv)}
-                  title="Supprimer la discussion"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </Button>
+                <div className="absolute right-3 top-[18px] flex items-center gap-1 opacity-0 group-hover:opacity-100 lg:group-hover:opacity-100 group-active:opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-primary hover:bg-primary/10 h-8 w-8 lg:opacity-100"
+                    onClick={(e) => handleEditStart(e, conv)}
+                    title="Modifier le titre"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8"
+                    onClick={(e) => handleDelete(e, conv)}
+                    title="Supprimer la discussion"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </Button>
+                </div>
               </motion.div>
             )) 
           ) : (

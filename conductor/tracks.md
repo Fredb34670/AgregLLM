@@ -20,5 +20,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Édition du titre du lien sauvegardé et amélioration de l'affichage du résumé**
+- [x] **Track: Édition du titre du lien sauvegardé et amélioration de l'affichage du résumé**
   *Link: [./tracks/edit_link_title_20260324/](./tracks/edit_link_title_20260324/)*

@@ -91,6 +91,16 @@ export const storage = {
     }
   },
 
+  updateConversationTitle: (id: string, title: string): void => {
+    const all = storage.getAllConversations();
+    const index = all.findIndex(c => c.id === id);
+    if (index >= 0) {
+      all[index].title = title;
+      localStorage.setItem(STORAGE_KEY_CONVERSATIONS, JSON.stringify(all));
+      triggerAutoSync(); // Auto-sync après modification titre
+    }
+  },
+
   renameTag: (oldName: string, newName: string): void => {
     if (!newName.trim() || oldName === newName) return;
     const all = storage.getAllConversations();

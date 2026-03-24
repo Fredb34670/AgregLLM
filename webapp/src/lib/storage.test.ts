@@ -134,4 +134,13 @@ describe('Storage Service', () => {
     expect(allFolders).toHaveLength(1);
     expect(allFolders[0].name).toBe('Imported Folder');
   });
+
+  it('peut mettre à jour le titre d\'une conversation', () => {
+    storage.saveConversation(mockConversation);
+    const newTitle = 'Nouveau Titre';
+    storage.updateConversationTitle(mockConversation.id, newTitle);
+    
+    const updated = storage.getConversationById(mockConversation.id);
+    expect(updated?.title).toBe(newTitle);
+  });
 });
