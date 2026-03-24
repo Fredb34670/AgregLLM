@@ -1,6 +1,6 @@
 # Implementation Plan - Firefox Extension Rejection Fixes
 
-## Phase 1: Cleanup and Manifest Fixes
+## Phase 1: Cleanup and Manifest Fixes [checkpoint: 0de7ce9]
 - [x] Task: Remove all test files from `firefox-submission/`
     - [ ] Delete all files matching `*.test.js` in `firefox-submission/scripts/` and any other subdirectories.
 - [x] Task: Clean up `manifest.json` in `firefox-submission/` [16a5667]
