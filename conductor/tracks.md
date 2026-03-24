@@ -18,7 +18,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Correction de la page blanche lors de l'ouverture de l'application via l'extension**
   *Link: [./archive/fix_white_page_20260323/](./archive/fix_white_page_20260323/)*
 
----
-
 - [x] **Track: Édition du titre du lien sauvegardé et amélioration de l'affichage du résumé**
-  *Link: [./tracks/edit_link_title_20260324/](./tracks/edit_link_title_20260324/)*
+  *Link: [./archive/edit_link_title_20260324/](./archive/edit_link_title_20260324/)*
