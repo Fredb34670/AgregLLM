@@ -23,5 +23,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Fix Firefox addon rejections due to syntax errors (ESM/TS) and incorrect file inclusion (tests)**
+- [~] **Track: Fix Firefox addon rejections due to syntax errors (ESM/TS) and incorrect file inclusion (tests)**
   *Link: [./tracks/fix_firefox_rejection_20260324/](./tracks/fix_firefox_rejection_20260324/)*
+
+- [ ] **Track: Fix Firefox Addon Submission Errors (Validation Rejection)**
+  *Link: [./tracks/fix_firefox_addon_validation_20260324/](./tracks/fix_firefox_addon_validation_20260324/)*
