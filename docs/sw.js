@@ -1,4 +1,4 @@
-const CACHE_NAME = 'agregllm-v2';
+const CACHE_NAME = 'agregllm-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -6,11 +6,9 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // Forcer le Service Worker à s'activer immédiatement
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
 });
 
@@ -20,18 +18,30 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))
       );
-    })
+    }).then(() => self.clients.claim()) // Prendre le contrôle immédiatement
   );
 });
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Retourner la réponse du cache si elle existe, sinon fetch
-      return response || fetch(event.request).catch((err) => {
-        console.error('SW fetch failed:', err);
-        // On pourrait retourner une page de secours ici
-      });
-    })
-  );
+  // Stratégie : Network First pour HTML et JS, Cache First pour le reste
+  const isCritical = event.request.mode === 'navigate' || 
+                     event.request.destination === 'script' || 
+                     event.request.destination === 'style';
+
+  if (isCritical) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Mettre à jour le cache avec la nouvelle version
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+  } else {
+    event.respondWith(
+      caches.match(event.request).then((response) => response || fetch(event.request))
+    );
+  }
 });
