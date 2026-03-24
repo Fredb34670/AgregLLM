@@ -13,6 +13,6 @@
     - [x] Check all `.js` files for `import`, `export`, or `as ` (TS type cast) statements.
     - [x] If found, refactor to valid ES5/ES6 script syntax (e.g., using `browser.runtime.onMessage` instead of exports, or removing the statements if they were only for tests).
 
-## Phase 3: Validation and Re-build (Optional)
-- [ ] Task: Run a local validation (if any tool is available) or prepare for re-submission.
-- [ ] Task: Conductor - User Manual Verification 'Cleanup and Manifest Fixes' (Protocol in workflow.md)
+## Phase 3: Validation and Re-build (Optional) [850bce4]
+- [x] Task: Run a local validation (if any tool is available) or prepare for re-submission.
+- [x] Task: Conductor - User Manual Verification 'Cleanup and Manifest Fixes' (Protocol in workflow.md)
