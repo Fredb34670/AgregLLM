@@ -1,0 +1,53 @@
+{
+  "manifest_version": 2,
+  "name": "AgregLLM",
+  "version": "1.2.0",
+  "description": "Agregateur de discussions LLM",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "agregllm@fredb34670.github.io",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "collection": false,
+        "required": ["none"]
+      }
+    }
+  },
+  "icons": {
+    "48": "icon-192.png",
+    "128": "icon-512.png"
+  },
+  "permissions": [
+    "storage",
+    "contextMenus",
+    "tabs",
+    "activeTab",
+    "notifications",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["vendor/browser-polyfill.js", "background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["vendor/browser-polyfill.js", "scripts/content.js"]
+    },
+    {
+      "matches": ["http://localhost/*", "http://127.0.0.1/*", "https://fredb34670.github.io/AgregLLM/*"],
+      "js": ["vendor/browser-polyfill.js", "scripts/sync.js"]
+    }
+  ],
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icon-192.png"
+    }
+  },
+  "content_security_policy": "script-src 'self'; object-src 'self'",
+  "web_accessible_resources": [
+    "index.html",
+    "assets/*",
+    "test.html"
+  ]
+}
