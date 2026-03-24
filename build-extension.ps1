@@ -48,6 +48,13 @@ foreach ($folder in $folders) {
         $dest = "$firefoxDir/$folder"
         New-Item -ItemType Directory -Path $dest -Force | Out-Null
         Copy-Item "extension/$folder/*" "$dest" -Recurse -Exclude "*.test.js" -Force
+        
+        # Nettoyer sync.js des exports de test
+        if ($folder -eq "scripts" -and (Test-Path "$dest/sync.js")) {
+            $syncContent = Get-Content "$dest/sync.js" -Raw
+            $syncContent = $syncContent -replace "(?s)// Export pour les tests.*", ""
+            $syncContent | Set-Content "$dest/sync.js" -NoNewline -Force
+        }
     }
 }
 
@@ -84,6 +91,13 @@ foreach ($folder in $folders) {
         $dest = "$chromeDir/$folder"
         New-Item -ItemType Directory -Path $dest -Force | Out-Null
         Copy-Item "extension/$folder/*" "$dest" -Recurse -Exclude "*.test.js" -Force
+        
+        # Nettoyer sync.js des exports de test
+        if ($folder -eq "scripts" -and (Test-Path "$dest/sync.js")) {
+            $syncContent = Get-Content "$dest/sync.js" -Raw
+            $syncContent = $syncContent -replace "(?s)// Export pour les tests.*", ""
+            $syncContent | Set-Content "$dest/sync.js" -NoNewline -Force
+        }
     }
 }
 

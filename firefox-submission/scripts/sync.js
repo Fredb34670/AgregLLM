@@ -80,8 +80,3 @@ browser.runtime.onMessage.addListener((msg) => {
 
 // Synchro initiale au chargement de la page
 syncData();
-
-// Export pour les tests
-if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
-  module.exports = { syncData };
-}
