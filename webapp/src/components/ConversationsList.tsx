@@ -11,6 +11,8 @@ import {
     Search, 
     Trash2, 
     Pencil,
+    Check,
+    X,
     Folder as FolderIcon,
     Star
   } from 'lucide-react';
@@ -238,15 +240,31 @@ export function ConversationsList() {
                         </button>
                         
                         {editingId === conv.id ? (
-                          <Input
-                            autoFocus
-                            className="h-8 flex-1"
-                            value={editTitle}
-                            onChange={(e) => setEditTitle(e.target.value)}
-                            onKeyDown={(e) => handleKeyDown(e, conv.id)}
-                            onBlur={() => handleEditSave(conv.id)}
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                          />
+                          <div className="flex items-center gap-1 flex-1 min-w-0" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                            <Input
+                              autoFocus
+                              className="h-8 flex-1"
+                              value={editTitle}
+                              onChange={(e) => setEditTitle(e.target.value)}
+                              onKeyDown={(e) => handleKeyDown(e, conv.id)}
+                            />
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                              onClick={() => handleEditSave(conv.id)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="h-8 w-8 text-muted-foreground hover:bg-muted"
+                              onClick={handleEditCancel}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
                         ) : (
                           <CardTitle className="text-lg font-bold truncate group-hover/card:text-primary transition-colors">
                             {conv.title}
