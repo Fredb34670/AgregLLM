@@ -20,7 +20,7 @@ Ce document détaille la stack technologique choisie pour le développement de l
 ## 4. Extension de Navigateur
 - **Technologie :** **Vanilla JavaScript (JS pur)**, HTML et CSS.
 - **Justification :** Cette approche est privilégiée pour garantir que l'extension reste **légère, rapide et performante**, minimisant son impact sur les performances du navigateur.
-- **Manifest :** L'extension sera développée en suivant les standards du **Manifest V3**.
+- **Manifest :** L'extension sera développée en suivant les standards du **Manifest V3** (Chrome) et **Manifest V2** (Firefox, pour une compatibilité maximale).
 
 ## 5. Hébergement et Déploiement (Suggestion)
 - **Frontend :** Vercel ou Netlify, qui offrent d'excellents niveaux gratuits pour les applications React.
