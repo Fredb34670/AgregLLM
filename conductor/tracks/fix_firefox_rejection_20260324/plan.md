@@ -1,12 +1,12 @@
 # Implementation Plan - Firefox Extension Rejection Fixes
 
 ## Phase 1: Cleanup and Manifest Fixes
-- [ ] Task: Remove all test files from `firefox-submission/`
+- [x] Task: Remove all test files from `firefox-submission/`
     - [ ] Delete all files matching `*.test.js` in `firefox-submission/scripts/` and any other subdirectories.
-- [ ] Task: Clean up `manifest.json` in `firefox-submission/`
-    - [ ] Remove `data_collection_permissions` from `browser_specific_settings.gecko`.
-    - [ ] Verify `strict_min_version` (140.0 seems very high, maybe lower it to a more reasonable version if needed, or keep it if intentional).
-    - [ ] Ensure `permissions` and `content_scripts` match the required functionality without being overly broad.
+- [x] Task: Clean up `manifest.json` in `firefox-submission/` [16a5667]
+    - [x] Remove `data_collection_permissions` from `browser_specific_settings.gecko`.
+    - [x] Verify `strict_min_version` (140.0 seems very high, maybe lower it to a more reasonable version if needed, or keep it if intentional).
+    - [x] Ensure `permissions` and `content_scripts` match the required functionality without being overly broad.
 
 ## Phase 2: Syntax Verification
 - [ ] Task: Verify no ESM/TS syntax in `firefox-submission/`
