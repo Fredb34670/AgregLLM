@@ -31,6 +31,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Aide à la reconnexion pour les discussions liées au compte**
+- [~] **Track: Aide à la reconnexion pour les discussions liées au compte**
   *Link: [./tracks/fix_account_linked_access_20260421/](./tracks/fix_account_linked_access_20260421/)*
 

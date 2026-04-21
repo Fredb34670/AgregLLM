@@ -3,9 +3,9 @@
 ## Phase 1 : Extension - Capture de l'e-mail du compte
 **Objectif** : Identifier et sauvegarder l'e-mail du compte LLM lors de la capture d'une discussion.
 
-- [ ] Task: Étudier et implémenter la détection de l'e-mail utilisateur sur les pages ChatGPT (via DOM ou sélecteurs).
-- [ ] Task: Mettre à jour le script de contenu (`content.js`) pour inclure le champ `accountEmail` dans l'objet de discussion capturé.
-- [ ] Task: Adapter les tests de l'extension pour vérifier la capture du champ `accountEmail`.
+- [x] Task: Étudier et implémenter la détection de l'e-mail utilisateur sur les pages ChatGPT (via DOM ou sélecteurs).
+- [~] Task: Mettre à jour le script de contenu (`content.js`) pour inclure le champ `accountEmail` dans l'objet de discussion capturé.
+- [x] Task: Adapter les tests de l'extension pour vérifier la capture du champ `accountEmail`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
 ## Phase 2 : Webapp - Persistance et Synchronisation Cloud

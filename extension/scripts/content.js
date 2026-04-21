@@ -97,6 +97,40 @@ function capture() {
 
     console.log("AgregLLM: Capture réussie", title, llmName);
 
+    // --- Capture de l'email du compte ---
+    let accountEmail = undefined;
+    try {
+      if (hostname.includes("chatgpt.com") || hostname.includes("openai.com")) {
+        // Sélecteurs plus robustes pour ChatGPT
+        const selectors = [
+          'div[class*="text-token-text-tertiary"]', 
+          '[data-testid="profile-button"] div.truncate',
+          'div.user-menu-item div.truncate',
+          'button[id="user-menu-button"] span.truncate'
+        ];
+
+        for (const selector of selectors) {
+          const el = document.querySelector(selector);
+          if (el && el.innerText.includes('@')) {
+            accountEmail = el.innerText.trim();
+            break;
+          }
+        }
+      }
+ else if (hostname.includes("gemini.google.com")) {
+        const emailEl = document.querySelector('div[class*="gb_Vb"], [aria-label^="Compte Google"]');
+        if (emailEl) {
+          const match = emailEl.getAttribute('aria-label')?.match(/[\w.-]+@[\w.-]+\.\w+/);
+          if (match) accountEmail = match[0];
+        }
+      } else if (hostname.includes("claude.ai")) {
+        const emailEl = document.querySelector('div[class*="text-slate-500"]');
+        if (emailEl && emailEl.innerText.includes('@')) {
+          accountEmail = emailEl.innerText.trim();
+        }
+      }
+    } catch (e) { console.error("AgregLLM: Erreur capture email", e); }
+
     // Tentative d'extraction de date (très basique, à affiner selon les LLM)
     let displayDate = new Date().toISOString();
     // Sur ChatGPT, on pourrait chercher des éléments spécifiques, mais new Date() reste le plus sûr
@@ -110,6 +144,7 @@ function capture() {
         date: displayDate,
         summary: summary,
         tags: suggestedTags,
+        accountEmail: accountEmail,
         messages: [] 
       }
     };
@@ -122,21 +157,20 @@ function capture() {
 
 // Écouteur de messages du background script (ou popup)
 if (typeof browser === "undefined") {
-    var browser = chrome;
+    var browser = (typeof chrome !== "undefined") ? chrome : undefined;
 }
 
-browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  console.log("AgregLLM: Message reçu", msg);
-  
-  if (msg.action === "capture") {
-    // On retourne une promesse ou on appelle sendResponse directement
-    // Pour Firefox/Chrome compatibilité, le return true est important pour l'asynchrone
-    // Mais ici capture() est synchrone.
-    const result = capture();
-    console.log("AgregLLM: Envoi réponse", result);
-    sendResponse(result);
-  }
-  
-  // Important pour la compatibilité Firefox si on voulait faire de l'async
-  // return true; 
-});
+if (browser && browser.runtime && browser.runtime.onMessage) {
+  browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    console.log("AgregLLM: Message reçu", msg);
+
+    if (msg.action === "capture") {
+      const result = capture();
+      console.log("AgregLLM: Envoi réponse", result);
+      sendResponse(result);
+    }
+  });
+}
+
+// Export pour les tests
+export { capture };

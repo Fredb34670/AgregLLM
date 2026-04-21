@@ -70,6 +70,7 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
             let llmName = "Inconnu";
             let title = document.title;
             let summary = "";
+            let accountEmail = undefined;
 
             // ChatGPT
             if (hostname.includes("chatgpt.com") || hostname.includes("openai.com")) {
@@ -78,6 +79,47 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
               if (titleEl) title = titleEl.innerText;
               const userMsg = document.querySelector('[data-message-author-role="user"]');
               if (userMsg) summary = userMsg.innerText;
+
+              // Capture de l'email
+              const selectors = [
+                'div[class*="text-token-text-tertiary"]', 
+                '[data-testid="profile-button"] div.truncate',
+                'div.user-menu-item div.truncate',
+                'button[id="user-menu-button"] span.truncate',
+                'div[class*="not-group-data-disabled:text-token-text-tertiary"]'
+              ];
+              for (const selector of selectors) {
+                const el = document.querySelector(selector);
+                if (el && el.innerText.includes('@')) {
+                  accountEmail = el.innerText.trim();
+                  break;
+                }
+              }
+
+              // Fallback : recherche agressive dans tous les éléments susceptibles de contenir un email
+              if (!accountEmail) {
+                const allElements = document.querySelectorAll('div, span, button');
+                for (let i = 0; i < allElements.length; i++) {
+                  const text = allElements[i].innerText;
+                  if (text && text.length < 50 && text.includes('@') && /[\\w.-]+@[\\w.-]+\\.\\w+/.test(text)) {
+                    accountEmail = text.trim();
+                    break;
+                  }
+                }
+              }
+
+              // Fallback 2 : Recherche dans __NEXT_DATA__ (spécifique à Next.js / ChatGPT)
+              if (!accountEmail) {
+                try {
+                  const nextData = document.getElementById('__NEXT_DATA__');
+                  if (nextData) {
+                    const json = JSON.parse(nextData.textContent);
+                    if (json.props && json.props.pageProps && json.props.pageProps.user) {
+                      accountEmail = json.props.pageProps.user.email;
+                    }
+                  }
+                } catch(e) {}
+              }
             }
             // Claude
             else if (hostname.includes("claude.ai")) {
@@ -86,6 +128,11 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
               if (titleEl && titleEl.innerText.length > 2) title = titleEl.innerText;
               const userMsg = document.querySelector('.font-user-message, [data-test-id="user-message"]');
               if (userMsg) summary = userMsg.innerText;
+
+              const emailEl = document.querySelector('div[class*="text-slate-500"]');
+              if (emailEl && emailEl.innerText.includes('@')) {
+                accountEmail = emailEl.innerText.trim();
+              }
             }
             // Gemini
             else if (hostname.includes("gemini.google.com")) {
@@ -94,6 +141,12 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
               if (titleEl) title = titleEl.innerText;
               const userMsg = document.querySelector('.user-query-text, user-query');
               if (userMsg) summary = userMsg.innerText;
+
+              const emailEl = document.querySelector('div[class*="gb_Vb"], [aria-label^="Compte Google"]');
+              if (emailEl) {
+                const match = emailEl.getAttribute('aria-label')?.match(/[\\w.-]+@[\\w.-]+\\.\\w+/);
+                if (match) accountEmail = match[0];
+              }
             }
             // AI Studio
             else if (hostname.includes("aistudio.google.com")) {
@@ -149,6 +202,7 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
               date: new Date().toISOString(),
               summary: summary,
               tags: suggestedTags,
+              accountEmail: (typeof accountEmail !== 'undefined') ? accountEmail : undefined,
               messages: []
             };
           })();
