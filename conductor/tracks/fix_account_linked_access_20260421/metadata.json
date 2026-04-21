@@ -1,0 +1,8 @@
+{
+  "track_id": "fix_account_linked_access_20260421",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-04-21T10:00:00Z",
+  "updated_at": "2026-04-21T10:00:00Z",
+  "description": "Il y a un soucis de 'lien non trouvé', lorsque celui-ci veut acceder à une discussion sur un compte non connecté. Il faudrait lors de l'aquisition d'un nouveau lien, sauvegarder le compte de connexion, de façon à ce qu'à la lecture du lien, une fenêtre de connexion soit proposée pour se connecter si le compte ne l'est pas déjà."
+}
