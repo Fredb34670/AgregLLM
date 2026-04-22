@@ -43,18 +43,21 @@ function showLoginHelper(email) {
 
 function detectError() {
   const hostname = window.location.hostname;
-  const pageText = document.body.innerText || document.body.textContent || "";
+  const pageText = (document.body.innerText || document.body.textContent || "").toLowerCase();
   
   if (hostname.includes("chatgpt.com") || hostname.includes("openai.com")) {
     const errorEl = document.querySelector('div[class*="text-token-text-secondary"]');
-    const errorText = errorEl ? (errorEl.innerText || errorEl.textContent || "") : "";
+    const errorText = errorEl ? (errorEl.innerText || errorEl.textContent || "").toLowerCase() : "";
     
-    return pageText.includes("404") || 
-           pageText.includes("Conversation not found") || 
-           pageText.includes("Unable to load conversation") ||
-           pageText.includes("Impossible de charger la conversation") ||
-           pageText.includes("Impossible de charger la discussion") ||
+    const hasError = pageText.includes("404") || 
+           pageText.includes("conversation not found") || 
+           pageText.includes("unable to load conversation") ||
+           pageText.includes("impossible de charger la conversation") ||
+           pageText.includes("impossible de charger la discussion") ||
            errorText.includes("not found");
+
+    if (hasError) console.log("AgregLLM: Erreur ChatGPT détectée !");
+    return hasError;
   }
   
   if (hostname.includes("claude.ai")) {
@@ -278,4 +281,19 @@ function init() {
 }
 
 // On attend un peu que le DOM soit chargé et les scripts du LLM exécutés (pour les erreurs asynchrones)
-setTimeout(init, 2000);
+function startDetection() {
+  init();
+  // Observer les changements du DOM pour les erreurs qui apparaissent après le chargement initial
+  const observer = new MutationObserver((mutations) => {
+    if (detectError()) {
+      init();
+      observer.disconnect(); // On a trouvé l'erreur, on arrête d'observer
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  
+  // Timeout de sécurité pour arrêter l'observation après 10 secondes
+  setTimeout(() => observer.disconnect(), 10000);
+}
+
+setTimeout(startDetection, 2000);
