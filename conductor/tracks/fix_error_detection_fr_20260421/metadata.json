@@ -1,8 +1,8 @@
 {
   "track_id": "fix_error_detection_fr_20260421",
   "type": "bug",
-  "status": "new",
+  "status": "in_progress",
   "created_at": "2026-04-21T18:00:00Z",
-  "updated_at": "2026-04-21T18:00:00Z",
-  "description": "Support du français pour la détection d'erreur ChatGPT et capture du nom d'utilisateur comme identifiant de secours."
+  "updated_at": "2026-04-22T10:00:00Z",
+  "description": "Support du français pour la détection d'erreur ChatGPT (incluant 'Impossible de charger la discussion' inter-comptes) et capture du nom d'utilisateur comme identifiant de secours."
 }

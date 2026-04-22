@@ -52,6 +52,8 @@ function detectError() {
     return pageText.includes("404") || 
            pageText.includes("Conversation not found") || 
            pageText.includes("Unable to load conversation") ||
+           pageText.includes("Impossible de charger la conversation") ||
+           pageText.includes("Impossible de charger la discussion") ||
            errorText.includes("not found");
   }
   

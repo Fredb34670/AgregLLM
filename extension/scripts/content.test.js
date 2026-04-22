@@ -43,6 +43,16 @@ describe('Content Script', () => {
       expect(detectError()).toBe(true);
     });
 
+    test('should detect French "Impossible de charger la conversation" on ChatGPT', () => {
+      document.body.innerText = "Impossible de charger la conversation";
+      expect(detectError()).toBe(true);
+    });
+
+    test('should detect French "Impossible de charger la discussion" on ChatGPT', () => {
+      document.body.innerText = "Impossible de charger la discussion";
+      expect(detectError()).toBe(true);
+    });
+
     test('should return false if no error text', () => {
       document.body.innerText = "Hello, how can I help you today?";
       expect(detectError()).toBe(false);
@@ -54,7 +64,7 @@ describe('Content Script', () => {
       showLoginHelper('test@example.com');
       const modal = document.getElementById('agregllm-login-helper');
       expect(modal).not.toBeNull();
-      expect(modal.innerText).toContain('test@example.com');
+      expect(modal.textContent).toContain('test@example.com');
     });
 
     test('should not inject twice', () => {
