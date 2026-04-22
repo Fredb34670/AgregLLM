@@ -29,8 +29,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] Track: Fix Firefox Addon Submission Errors (Validation Rejection)
   *Link: [./archive/fix_firefox_addon_validation_20260324/](./archive/fix_firefox_addon_validation_20260324/)*
 
----
 
-- [~] **Track: Aide à la reconnexion pour les discussions liées au compte**
-  *Link: [./tracks/fix_account_linked_access_20260421/](./tracks/fix_account_linked_access_20260421/)*
 
