@@ -41,3 +41,7 @@ L'application offrira un système d'organisation multi-facettes pour une flexibi
 - Le design sera **clair, moderne et épuré**.
 - La priorité absolue sera donnée à une **navigation intuitive et rapide**. L'utilisateur doit pouvoir trouver, filtrer et accéder à ses discussions en un minimum d'étapes.
 - Les outils de recherche, de tri et de filtrage (par tag, par dossier, par date) seront facilement accessibles.
+
+## 6. Aide à la reconnexion
+- Pour pallier le problème des erreurs "Lien non trouvé" survenant lors d'un changement de compte LLM, l'extension capturera l'adresse e-mail du compte actif lors de la sauvegarde d'une discussion.
+- En cas d'erreur lors d'un accès ultérieur, une interface d'aide indiquera à l'utilisateur quel compte utiliser pour retrouver sa discussion.
