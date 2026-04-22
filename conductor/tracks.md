@@ -29,5 +29,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] Track: Fix Firefox Addon Submission Errors (Validation Rejection)
   *Link: [./archive/fix_firefox_addon_validation_20260324/](./archive/fix_firefox_addon_validation_20260324/)*
 
+---
+
+- [ ] **Track: Correction détection d'erreur et capture de compte (FR)**
+  *Link: [./tracks/fix_error_detection_fr_20260421/](./tracks/fix_error_detection_fr_20260421/)*
+
 
 
