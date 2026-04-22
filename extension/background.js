@@ -252,6 +252,15 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
             .catch((e) => sendResponse({ success: false, error: e.message }));
         return true; // Indique une réponse asynchrone
     }
+    
+    if (message.action === "get_account_email" && message.url) {
+        browser.storage.local.get("conversations").then(res => {
+            const list = res.conversations || [];
+            const conv = list.find(c => c.url === message.url);
+            sendResponse({ accountEmail: conv ? conv.accountEmail : undefined });
+        }).catch(e => sendResponse({ error: e.message }));
+        return true;
+    }
 });
 
 // Fonction utilitaire de sauvegarde centralisée

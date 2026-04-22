@@ -22,6 +22,7 @@ async function syncData() {
         capturedAt: new Date(extConv.date).getTime(),
         summary: extConv.summary || "",
         messages: extConv.messages || [],
+        accountEmail: extConv.accountEmail,
         // On préserve les métadonnées existantes de la Webapp
         tags: existing ? (existing.tags || []) : (extConv.tags || []),
         folderId: existing ? existing.folderId : undefined,

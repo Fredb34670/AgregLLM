@@ -24,4 +24,5 @@ export interface Conversation {
   tags?: string[];
   folderId?: string; // ID du dossier parent (optionnel, si à la racine = undefined)
   isFavorite?: boolean;
+  accountEmail?: string;
 }

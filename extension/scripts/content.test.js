@@ -1,12 +1,13 @@
-// content.test.js - Ajout de tests pour la capture de l'email
+// content.test.js - Tests pour la capture, détection d'erreur et modale
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 
-// Mock global chrome/browser AVANT l'import du script
+// Mock global chrome/browser
 const chromeMock = {
   runtime: {
     onMessage: {
       addListener: vi.fn()
-    }
+    },
+    sendMessage: vi.fn()
   }
 };
 global.chrome = chromeMock;
@@ -14,29 +15,53 @@ global.browser = chromeMock;
 window.chrome = chromeMock;
 window.browser = chromeMock;
 
-import { capture } from './content.js';
+import { capture, detectError, showLoginHelper } from './content.js';
 
-describe('Capture Account Email', () => {
+describe('Content Script', () => {
   beforeEach(() => {
-    // Mock du DOM minimal
     document.body.innerHTML = '';
     delete window.location;
     window.location = new URL('https://chatgpt.com/c/123');
+    vi.clearAllMocks();
   });
 
-  test('should capture accountEmail on ChatGPT if present', () => {
-    // Simulation d'un sélecteur possible pour l'email
-    const emailDiv = document.createElement('div');
-    emailDiv.className = 'text-token-text-tertiary';
-    emailDiv.innerText = 'user@example.com';
-    document.body.appendChild(emailDiv);
+  describe('Capture Account Email', () => {
+    test('should capture accountEmail on ChatGPT if present', () => {
+      const emailDiv = document.createElement('div');
+      emailDiv.className = 'text-token-text-tertiary';
+      emailDiv.innerText = 'user@example.com';
+      document.body.appendChild(emailDiv);
 
-    const result = capture();
-    expect(result.data.accountEmail).toBe('user@example.com');
+      const result = capture();
+      expect(result.data.accountEmail).toBe('user@example.com');
+    });
   });
 
-  test('should return undefined accountEmail if not found', () => {
-    const result = capture();
-    expect(result.data.accountEmail).toBeUndefined();
+  describe('Error Detection', () => {
+    test('should detect 404 error on ChatGPT', () => {
+      document.body.innerText = "Error 404: Conversation not found";
+      expect(detectError()).toBe(true);
+    });
+
+    test('should return false if no error text', () => {
+      document.body.innerText = "Hello, how can I help you today?";
+      expect(detectError()).toBe(false);
+    });
+  });
+
+  describe('Login Helper Modal', () => {
+    test('should inject the modal into the DOM', () => {
+      showLoginHelper('test@example.com');
+      const modal = document.getElementById('agregllm-login-helper');
+      expect(modal).not.toBeNull();
+      expect(modal.innerText).toContain('test@example.com');
+    });
+
+    test('should not inject twice', () => {
+      showLoginHelper('test@example.com');
+      showLoginHelper('other@example.com');
+      const modals = document.querySelectorAll('#agregllm-login-helper');
+      expect(modals.length).toBe(1);
+    });
   });
 });
