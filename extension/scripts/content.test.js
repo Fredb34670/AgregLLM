@@ -29,11 +29,24 @@ describe('Content Script', () => {
     test('should capture accountEmail on ChatGPT if present', () => {
       const emailDiv = document.createElement('div');
       emailDiv.className = 'text-token-text-tertiary';
-      emailDiv.innerText = 'user@example.com';
+      emailDiv.textContent = 'user@example.com';
       document.body.appendChild(emailDiv);
 
       const result = capture();
       expect(result.data.accountEmail).toBe('user@example.com');
+    });
+
+    test('should capture username if email is not present on ChatGPT', () => {
+      const profileBtn = document.createElement('button');
+      profileBtn.setAttribute('data-testid', 'profile-button');
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'truncate';
+      nameDiv.textContent = 'Adocart';
+      profileBtn.appendChild(nameDiv);
+      document.body.appendChild(profileBtn);
+
+      const result = capture();
+      expect(result.data.accountEmail).toBe('Adocart');
     });
   });
 

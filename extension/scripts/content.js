@@ -188,6 +188,15 @@ function capture() {
             break;
           }
         }
+
+        // Secours : Si aucun email trouvé, on prend le texte du bouton de profil comme nom d'utilisateur
+        if (!accountEmail) {
+          const profileBtn = document.querySelector('[data-testid="profile-button"] div.truncate, [data-testid="profile-button"]');
+          if (profileBtn) {
+            accountEmail = profileBtn.innerText || profileBtn.textContent || undefined;
+            if (accountEmail) accountEmail = accountEmail.trim();
+          }
+        }
       }
  else if (hostname.includes("gemini.google.com")) {
         const emailEl = document.querySelector('div[class*="gb_Vb"], [aria-label^="Compte Google"]');
