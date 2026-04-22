@@ -271,10 +271,9 @@ function init() {
     console.log("AgregLLM: Erreur détectée sur la page, vérification du compte...");
     if (browser && browser.runtime && browser.runtime.sendMessage) {
       browser.runtime.sendMessage({ action: "get_account_email", url: window.location.href }, (response) => {
-        if (response && response.accountEmail) {
-          console.log("AgregLLM: Aide à la reconnexion pour", response.accountEmail);
-          showLoginHelper(response.accountEmail);
-        }
+        const email = (response && response.accountEmail) ? response.accountEmail : "Compte inconnu (non sauvegardé)";
+        console.log("AgregLLM: Aide à la reconnexion. Identifiant:", email);
+        showLoginHelper(email);
       });
     }
   }
