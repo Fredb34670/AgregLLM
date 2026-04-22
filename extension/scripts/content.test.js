@@ -15,7 +15,7 @@ global.browser = chromeMock;
 window.chrome = chromeMock;
 window.browser = chromeMock;
 
-import { capture, detectError, showLoginHelper } from './content.js';
+const { capture, detectError, showLoginHelper } = require('./content.js');
 
 describe('Content Script', () => {
   beforeEach(() => {

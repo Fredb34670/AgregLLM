@@ -254,7 +254,13 @@ if (browser && browser.runtime && browser.runtime.onMessage) {
 }
 
 // Export pour les tests
-export { capture, detectError, showLoginHelper };
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { capture, detectError, showLoginHelper };
+} else if (typeof exports !== 'undefined') {
+  exports.capture = capture;
+  exports.detectError = detectError;
+  exports.showLoginHelper = showLoginHelper;
+}
 
 // --- Auto-exécution au chargement ---
 function init() {

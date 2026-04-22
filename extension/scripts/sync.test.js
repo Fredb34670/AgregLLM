@@ -19,8 +19,8 @@ global.browser = {
 global.window = {
   dispatchEvent: vi.fn(),
   addEventListener: vi.fn()
-} as any;
-global.CustomEvent = class { constructor(name: string) { (this as any).name = name; } } as any;
+};
+global.CustomEvent = class { constructor(name) { this.name = name; } };
 
 // Import de la fonction à tester
 const { syncData } = require('./sync.js');
@@ -57,7 +57,7 @@ describe('syncData - Persistence and Metadata', () => {
       summary: "Updated Summary",
       messages: [{ role: "user", content: "hello" }]
     };
-    (browser.storage.local.get as any).mockResolvedValue({ conversations: [extConv] });
+    (browser.storage.local.get).mockResolvedValue({ conversations: [extConv] });
 
     // 3. Exécuter la synchronisation
     await syncData();

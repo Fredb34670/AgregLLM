@@ -14,3 +14,8 @@ function isChatGPTConversationURL(url) {
   const chatGPTPattern = /^https:\/\/(chat\.openai\.com|chatgpt\.com)\/c\/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/;
   return chatGPTPattern.test(url);
 }
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { isChatGPTConversationURL };
+}
+
