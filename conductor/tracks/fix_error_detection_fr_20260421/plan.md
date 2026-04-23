@@ -7,7 +7,7 @@
 - [x] Task: Corriger les exports du content script pour le navigateur et mettre à jour les tests. [3c68eb2]
 - [x] Task: Améliorer la détection d'erreur (insensibilité à la casse, MutationObserver). [3570916]
 - [x] Task: Afficher la modale avec un message de secours si l'e-mail du compte est inconnu. [94c71e0]
-- [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) [1a681a6]
 
 ## Phase 2 : Archivage final
 - [ ] Task: Vérifier le bon affichage de la modale avec le nom d'utilisateur.

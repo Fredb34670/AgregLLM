@@ -36,17 +36,52 @@ describe('Content Script', () => {
       expect(result.data.accountEmail).toBe('user@example.com');
     });
 
-    test('should capture username if email is not present on ChatGPT', () => {
+    test('should capture username and skip subscription type (e.g., Free) on ChatGPT', () => {
       const profileBtn = document.createElement('button');
       profileBtn.setAttribute('data-testid', 'profile-button');
+      
+      const growContainer = document.createElement('div');
+      growContainer.className = 'grow';
       const nameDiv = document.createElement('div');
       nameDiv.className = 'truncate';
       nameDiv.textContent = 'Adocart';
-      profileBtn.appendChild(nameDiv);
+      growContainer.appendChild(nameDiv);
+      
+      const planDiv = document.createElement('div');
+      planDiv.className = 'truncate';
+      planDiv.textContent = 'Free';
+      
+      profileBtn.appendChild(growContainer);
+      profileBtn.appendChild(planDiv);
       document.body.appendChild(profileBtn);
 
       const result = capture();
       expect(result.data.accountEmail).toBe('Adocart');
+    });
+  });
+
+  describe('getCurrentIdentity', () => {
+    test('should return Adocart and skip Free even if Free comes first', () => {
+      const profileBtn = document.createElement('button');
+      profileBtn.setAttribute('data-testid', 'profile-button');
+      
+      const planDiv = document.createElement('div');
+      planDiv.className = 'truncate';
+      planDiv.textContent = 'Free';
+      
+      const growContainer = document.createElement('div');
+      growContainer.className = 'grow';
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'truncate';
+      nameDiv.textContent = 'Adocart';
+      growContainer.appendChild(nameDiv);
+      
+      profileBtn.appendChild(planDiv);
+      profileBtn.appendChild(growContainer);
+      document.body.appendChild(profileBtn);
+
+      const { getCurrentIdentity } = require('./content.js');
+      expect(getCurrentIdentity()).toBe('Adocart');
     });
   });
 
@@ -78,6 +113,7 @@ describe('Content Script', () => {
       const modal = document.getElementById('agregllm-login-helper');
       expect(modal).not.toBeNull();
       expect(modal.textContent).toContain('test@example.com');
+      expect(modal.textContent).toContain('Veuillez changer de compte');
     });
 
     test('should not inject twice', () => {

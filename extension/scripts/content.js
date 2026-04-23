@@ -1,7 +1,7 @@
 // content.js - Version Metadonnées Uniquement
 console.log("AgregLLM: Content script chargé sur", window.location.href);
 
-function showLoginHelper(email) {
+function showLoginHelper() {
   if (document.getElementById('agregllm-login-helper')) return;
 
   const div = document.createElement('div');
@@ -25,18 +25,21 @@ function showLoginHelper(email) {
   div.innerHTML = `
     <style>
       @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-      #agregllm-login-helper h3 { margin: 0 0 10px 0; font-size: 16px; color: #1a73e8; }
-      #agregllm-login-helper p { margin: 0 0 15px 0; font-size: 14px; line-height: 1.5; color: #555; }
-      #agregllm-login-helper .email-box { background: #f1f3f4; padding: 8px 12px; border-radius: 6px; font-weight: 500; font-family: monospace; word-break: break-all; margin-bottom: 15px; border: 1px dashed #ccc; }
-      #agregllm-login-helper .btn-close { background: #1a73e8; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; width: 100%; font-weight: 500; }
-      #agregllm-login-helper .btn-close:hover { background: #1557b0; }
+      #agregllm-login-helper h3 { margin: 0 0 10px 0; font-size: 16px; color: #d32f2f; }
+      #agregllm-login-helper p { margin: 0 0 10px 0; font-size: 14px; line-height: 1.5; color: #555; }
+      #agregllm-login-helper .btn-close { background: #444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; width: 100%; font-weight: 500; margin-top: 10px; }
+      #agregllm-login-helper .btn-close:hover { background: #222; }
     </style>
     <h3>AgregLLM : Discussion liée</h3>
-    <p>Cette discussion semble inaccessible avec votre compte actuel. Elle a été sauvegardée avec le compte suivant :</p>
-    <div class="email-box">${email}</div>
-    <p>Veuillez vous assurer d'être connecté avec cet e-mail sur ce LLM.</p>
-    <button class="btn-close" onclick="document.getElementById('agregllm-login-helper').remove()">J'ai compris</button>
+    <p>Cette discussion n'est pas accessible avec votre compte actuel.</p>
+    <p style="font-size: 13px; color: #666; background: #fffde7; padding: 10px; border-radius: 6px; border: 1px solid #fff9c4; margin-top: 10px;">
+      <b>Pourquoi ce message ?</b><br>
+      ChatGPT affiche une erreur car vous tentez d'ouvrir un lien appartenant à un autre compte utilisateur. Veuillez changer de compte sur ce LLM pour y accéder.
+    </p>
+    <button class="btn-close">J'ai compris</button>
   `;
+
+  div.querySelector('.btn-close').onclick = () => div.remove();
 
   document.body.appendChild(div);
 }
@@ -194,11 +197,7 @@ function capture() {
 
         // Secours : Si aucun email trouvé, on prend le texte du bouton de profil comme nom d'utilisateur
         if (!accountEmail) {
-          const profileBtn = document.querySelector('[data-testid="profile-button"] div.truncate, [data-testid="profile-button"]');
-          if (profileBtn) {
-            accountEmail = profileBtn.innerText || profileBtn.textContent || undefined;
-            if (accountEmail) accountEmail = accountEmail.trim();
-          }
+          accountEmail = getCurrentIdentity();
         }
       }
  else if (hostname.includes("gemini.google.com")) {
@@ -258,11 +257,62 @@ if (browser && browser.runtime && browser.runtime.onMessage) {
 
 // Export pour les tests
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { capture, detectError, showLoginHelper };
+  module.exports = { capture, detectError, showLoginHelper, getCurrentIdentity };
 } else if (typeof exports !== 'undefined') {
   exports.capture = capture;
   exports.detectError = detectError;
   exports.showLoginHelper = showLoginHelper;
+  exports.getCurrentIdentity = getCurrentIdentity;
+}
+
+function getCurrentIdentity() {
+  const hostname = window.location.hostname;
+  if (hostname.includes("chatgpt.com") || hostname.includes("openai.com")) {
+    const profileBtn = document.querySelector('[data-testid="profile-button"]');
+    if (profileBtn) {
+      const truncates = Array.from(profileBtn.querySelectorAll('.truncate'));
+      // Log pour diagnostic utilisateur
+      console.log("AgregLLM Debug: Truncates found:", truncates.map(el => el.innerText.trim()));
+      
+      const forbidden = ["free", "plus", "team", "enterprise", "ctrl", "shift", "+", "gratuit", "personal", "pro", "student", "edu"];
+      
+      const isIdentity = (text) => {
+        if (!text || text.length < 2) return false;
+        const t = text.toLowerCase().trim();
+        const forbidden = ["free", "plus", "team", "enterprise", "ctrl", "shift", "+", "gratuit", "personal", "pro", "student", "edu"];
+        // Exclusion stricte
+        if (forbidden.includes(t)) return false;
+        // Exclusion si commence par un mot interdit suivi d'un espace (ex: "Free Plan")
+        if (forbidden.some(f => t.startsWith(f + " "))) return false;
+        return true;
+      };
+
+      // 1. Chercher dans un conteneur 'grow' (structure fournie par l'utilisateur)
+      for (const el of truncates) {
+        let parent = el.parentElement;
+        while (parent && parent !== profileBtn) {
+          if (parent.classList.contains('grow')) {
+            const text = el.innerText.trim();
+            if (isIdentity(text)) {
+               console.log("AgregLLM Debug: Identity found in grow container:", text);
+               return text;
+            }
+          }
+          parent = parent.parentElement;
+        }
+      }
+
+      // 2. Fallback : premier qui n'est pas interdit
+      for (const el of truncates) {
+        const text = el.innerText.trim();
+        if (isIdentity(text)) {
+           console.log("AgregLLM Debug: Identity found in fallback:", text);
+           return text;
+        }
+      }
+    }
+  }
+  return undefined;
 }
 
 // --- Auto-exécution au chargement ---
@@ -271,9 +321,9 @@ function init() {
     console.log("AgregLLM: Erreur détectée sur la page, vérification du compte...");
     if (browser && browser.runtime && browser.runtime.sendMessage) {
       browser.runtime.sendMessage({ action: "get_account_email", url: window.location.href }, (response) => {
-        const email = (response && response.accountEmail) ? response.accountEmail : "Compte inconnu (non sauvegardé)";
-        console.log("AgregLLM: Aide à la reconnexion. Identifiant:", email);
-        showLoginHelper(email);
+        const stored = (response && response.accountEmail) ? response.accountEmail : undefined;
+        console.log("AgregLLM: Aide à la reconnexion. Propriétaire attendu:", stored);
+        showLoginHelper(stored);
       });
     }
   }
