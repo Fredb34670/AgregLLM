@@ -31,8 +31,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Correction détection d'erreur et capture de compte (FR)**
-  *Link: [./tracks/fix_error_detection_fr_20260421/](./tracks/fix_error_detection_fr_20260421/)*
+- [x] **Track: Correction détection d'erreur et capture de compte (FR)**
+  *Link: [./archive/fix_error_detection_fr_20260421/](./archive/fix_error_detection_fr_20260421/)*
 
 
 

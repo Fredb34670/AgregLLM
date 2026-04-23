@@ -10,5 +10,5 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) [1a681a6]
 
 ## Phase 2 : Archivage final
-- [ ] Task: Vérifier le bon affichage de la modale avec le nom d'utilisateur.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: Vérifier le bon affichage de la modale simplifiée sans identité. [e3f7828]
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md) [e3f7828]
