@@ -1,8 +1,0 @@
-{
-  "track_id": "fix_white_page_20260323",
-  "type": "bug",
-  "status": "new",
-  "created_at": "2026-03-23T10:00:00Z",
-  "updated_at": "2026-03-23T10:00:00Z",
-  "description": "lorsque j'ouvre l'application via l'extension, une page blanche s'affiche l'adresse étant : https://fredb34670.github.io/AgregLLM/"
-}
