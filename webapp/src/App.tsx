@@ -132,12 +132,16 @@ function Welcome() {
             <CardContent>
               <div className="flex flex-wrap gap-3 mt-1">
                 {stats.map(([llm, count]) => (
-                  <div key={llm} className="flex items-center gap-2 bg-background border rounded-full px-3 py-1 shadow-sm">
+                  <Link
+                    key={llm}
+                    to={`/conversations?llm=${encodeURIComponent(llm)}`}
+                    className="flex items-center gap-2 bg-background border rounded-full px-3 py-1 shadow-sm hover:bg-primary/5 hover:border-primary/30 transition-colors"
+                  >
                     <span className="font-semibold text-sm">{llm}</span>
                     <Badge variant="secondary" className="rounded-full h-5 min-w-[20px] flex items-center justify-center px-1 font-bold text-[10px]">
                       {count}
                     </Badge>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </CardContent>
@@ -154,6 +158,7 @@ function App() {
     const initCloud = async () => {
       try {
         await gdrive.init();
+        await gdrive.trySilentAuth();
         if (gdrive.isAuthenticated()) {
           console.log("AgregLLM: Cloud connected, starting background sync...");
           const cloudData = await gdrive.loadFromDrive();

@@ -25,6 +25,7 @@ vi.mock('../lib/google-drive', () => ({
     syncToDrive: vi.fn(),
     login: vi.fn(),
     logout: vi.fn(),
+    trySilentAuth: vi.fn().mockResolvedValue(false),
   }
 }));
 

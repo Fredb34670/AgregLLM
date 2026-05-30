@@ -16,6 +16,10 @@ extension/assets/
 tmp_*
 *.log
 *.png
+!extension/icon-48.png
+!extension/icon-128.png
+!extension/icon-192.png
+!extension/icon-512.png
 *.exe
 *.crx
 *.pem

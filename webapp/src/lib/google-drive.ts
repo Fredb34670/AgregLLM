@@ -6,6 +6,8 @@ const SCOPES = "https://www.googleapis.com/auth/drive.appdata https://www.google
 class GoogleDriveService {
   private tokenClient: any = null;
   private initPromise: Promise<void> | null = null;
+  private silentAuthResolver: ((value: boolean) => void) | null = null;
+  private pendingAuthPrompt: string | null = null;
 
   async init(): Promise<void> {
     if (this.initPromise) return this.initPromise;
@@ -45,14 +47,25 @@ class GoogleDriveService {
       callback: (response: any) => {
         if (response.error !== undefined) {
           console.error("AgregLLM GDrive Error:", response.error);
+          if (this.pendingAuthPrompt === 'none') {
+            this.pendingAuthPrompt = null;
+            this.silentAuthResolver?.(false);
+            this.silentAuthResolver = null;
+          }
           return;
         }
-        
+
         const expiry = Date.now() + (response.expires_in * 1000);
-        
+
         localStorage.setItem('agregllm_gdrive_token', response.access_token);
         localStorage.setItem('agregllm_gdrive_expiry', expiry.toString());
-        
+
+        if (this.pendingAuthPrompt === 'none') {
+          this.pendingAuthPrompt = null;
+          this.silentAuthResolver?.(true);
+          this.silentAuthResolver = null;
+        }
+
         window.dispatchEvent(new CustomEvent('agregllm-gdrive-auth-success'));
       },
     });
@@ -65,6 +78,27 @@ class GoogleDriveService {
     else {
       this.init().then(() => this.tokenClient?.requestAccessToken({ prompt: 'consent' }));
     }
+  }
+
+  async trySilentAuth(): Promise<boolean> {
+    if (!this.tokenClient) {
+      await this.init();
+      if (!this.tokenClient) return false;
+    }
+
+    if (this.isAuthenticated()) return true;
+
+    return new Promise((resolve) => {
+      this.pendingAuthPrompt = 'none';
+      this.silentAuthResolver = resolve;
+      try {
+        this.tokenClient!.requestAccessToken({ prompt: 'none' });
+      } catch {
+        this.pendingAuthPrompt = null;
+        this.silentAuthResolver = null;
+        resolve(false);
+      }
+    });
   }
 
   logout() {

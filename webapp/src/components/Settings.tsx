@@ -22,10 +22,14 @@ export function Settings() {
   useEffect(() => {
     gdrive.init();
     
-    // Charger les infos utilisateur si connecté
-    if (gdrive.isAuthenticated()) {
-      gdrive.getUserInfo().then(setUserInfo);
-    }
+    // Tentative de connexion silencieuse au chargement
+    gdrive.trySilentAuth().then((success) => {
+      if (success) {
+        gdrive.getUserInfo().then(setUserInfo);
+      } else if (gdrive.isAuthenticated()) {
+        gdrive.getUserInfo().then(setUserInfo);
+      }
+    });
     
     // Écouter l'événement de connexion réussie
     const handleAuthSuccess = async () => {

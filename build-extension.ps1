@@ -15,10 +15,14 @@ $files = @(
     "popup.html",
     "popup.css",
     "popup.js",
+    "icon-48.png",
+    "icon-128.png",
     "icon-192.png",
     "icon-512.png",
     "icon.svg",
-    "manifest.json"
+    "manifest.json",
+    "index.html",
+    "test.html"
 )
 
 $folders = @(

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { storage } from '../lib/storage';
 import { Conversation, Folder } from '../types';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,15 +23,15 @@ export function ConversationsList() {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'title'>('date');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedLlm, setSelectedLlm] = useState<string | null>(null);
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   
   // État pour l'édition du titre
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
 
-  const location = useLocation();
-  const query = new URLSearchParams(location.search);
-  const currentFolderId = query.get('folder');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentFolderId = searchParams.get('folder');
 
   const refreshData = () => {
     setConversations(storage.getAllConversations());
@@ -78,6 +78,12 @@ export function ConversationsList() {
     return Array.from(tags).sort();
   }, [conversations]);
 
+  const allLlm = useMemo(() => {
+    const llms = new Set<string>();
+    conversations.forEach(c => llms.add(c.llm));
+    return Array.from(llms).sort();
+  }, [conversations]);
+
   const getFolderName = (id?: string) => {
     if (!id) return null;
     return folders.find(f => f.id === id)?.name;
@@ -111,13 +117,16 @@ export function ConversationsList() {
 
   useEffect(() => {
     refreshData();
+    const llmParam = searchParams.get('llm');
+    setSelectedLlm(llmParam);
+    setSelectedTag(null);
     window.addEventListener('storage', refreshData);
     window.addEventListener('agregllm-sync-complete', refreshData);
     return () => {
       window.removeEventListener('storage', refreshData);
       window.removeEventListener('agregllm-sync-complete', refreshData);
     };
-  }, []);
+  }, [searchParams]);
 
   const filteredAndSortedConversations = useMemo(() => {
     return conversations
@@ -127,9 +136,10 @@ export function ConversationsList() {
           conv.llm.toLowerCase().includes(search.toLowerCase()) ||
           (conv.summary && conv.summary.toLowerCase().includes(search.toLowerCase()));
         const matchesTag = !selectedTag || (conv.tags || []).includes(selectedTag);
+        const matchesLlm = !selectedLlm || conv.llm === selectedLlm;
         const matchesFavorite = !onlyFavorites || conv.isFavorite;
         
-        return matchesFolder && matchesSearch && matchesTag && matchesFavorite;
+        return matchesFolder && matchesSearch && matchesTag && matchesLlm && matchesFavorite;
       })
       .sort((a, b) => {
         if (sortBy === 'date') {
@@ -181,6 +191,28 @@ export function ConversationsList() {
             </Badge>
           ))}
         </div>
+
+        {allLlm.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2 border-t border-border/20 pt-2 w-full md:w-auto md:border-t-0 md:pt-0">
+            <Badge
+              variant={selectedLlm === null ? 'secondary' : 'outline'}
+              className="cursor-pointer border-dashed"
+              onClick={() => { setSelectedLlm(null); setSearchParams(prev => { prev.delete('llm'); return prev; }); }}
+            >
+              Tous les LLM
+            </Badge>
+            {allLlm.map(llm => (
+              <Badge
+                key={llm}
+                variant={selectedLlm === llm ? 'default' : 'outline'}
+                className={`cursor-pointer ${selectedLlm === llm ? '' : 'bg-primary/5 text-primary border-primary/20 hover:bg-primary/10'}`}
+                onClick={() => { setSelectedLlm(selectedLlm === llm ? null : llm); setSearchParams(prev => { if (selectedLlm === llm) prev.delete('llm'); else prev.set('llm', llm); return prev; }); }}
+              >
+                {llm}
+              </Badge>
+            ))}
+          </div>
+        )}
 
         <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-lg">
           <Button 
