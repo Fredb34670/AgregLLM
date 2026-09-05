@@ -158,13 +158,13 @@ function App() {
     const initCloud = async () => {
       try {
         await gdrive.init();
-        await gdrive.trySilentAuth();
+
+        // Connexion silencieuse uniquement si un token existe déjà
         if (gdrive.isAuthenticated()) {
           console.log("AgregLLM: Cloud connected, starting background sync...");
           const cloudData = await gdrive.loadFromDrive();
           if (cloudData) {
             storage.importData(cloudData);
-            // Declencher un evenement pour rafraichir l'UI
             window.dispatchEvent(new Event('storage'));
           }
         }
@@ -172,7 +172,7 @@ function App() {
         console.error("AgregLLM: GDrive init failed", e);
       }
     };
-    
+
     initCloud();
 
     // Écouter les connexions réussies pour charger les données immédiatement

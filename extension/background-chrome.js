@@ -1,5 +1,23 @@
 // background-chrome.js - Version pour Chrome Manifest V3 (Service Worker)
 
+// Vérifie si une URL correspond à une page LLM (conversation)
+function isLLMPage(url) {
+    if (!url) return false;
+    try {
+        const hostname = new URL(url).hostname;
+        const llmHosts = [
+            'chatgpt.com', 'chat.openai.com', 'openai.com',
+            'claude.ai',
+            'gemini.google.com', 'aistudio.google.com',
+            'mistral.ai', 'perplexity.ai', 'deepseek.com',
+            'cohere.com', 'anthropic.com', 'ai.google.com'
+        ];
+        return llmHosts.some(h => hostname.includes(h));
+    } catch {
+        return false;
+    }
+}
+
 // Fonction pour mettre à jour l'icône selon si l'URL est sauvegardée
 async function updateIcon(tabId, url) {
     if (!url || !url.startsWith('http')) return;
@@ -7,10 +25,14 @@ async function updateIcon(tabId, url) {
         const res = await chrome.storage.local.get("conversations");
         const list = res.conversations || [];
         const isSaved = list.some(c => c.url === url);
-        
+        const isLLM = isLLMPage(url);
+
         if (isSaved) {
             chrome.action.setBadgeText({ text: "✓", tabId });
             chrome.action.setBadgeBackgroundColor({ color: "#4CAF50", tabId });
+        } else if (isLLM) {
+            chrome.action.setBadgeText({ text: "!", tabId });
+            chrome.action.setBadgeBackgroundColor({ color: "#FFC107", tabId });
         } else {
             chrome.action.setBadgeText({ text: "", tabId });
         }

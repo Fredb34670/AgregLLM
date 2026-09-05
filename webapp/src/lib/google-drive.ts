@@ -8,6 +8,7 @@ class GoogleDriveService {
   private initPromise: Promise<void> | null = null;
   private silentAuthResolver: ((value: boolean) => void) | null = null;
   private pendingAuthPrompt: string | null = null;
+  private loginInProgress = false;
 
   async init(): Promise<void> {
     if (this.initPromise) return this.initPromise;
@@ -47,11 +48,12 @@ class GoogleDriveService {
       callback: (response: any) => {
         if (response.error !== undefined) {
           console.error("AgregLLM GDrive Error:", response.error);
-          if (this.pendingAuthPrompt === 'none') {
+          if (this.pendingAuthPrompt !== null) {
             this.pendingAuthPrompt = null;
             this.silentAuthResolver?.(false);
             this.silentAuthResolver = null;
           }
+          this.loginInProgress = false;
           return;
         }
 
@@ -60,24 +62,35 @@ class GoogleDriveService {
         localStorage.setItem('agregllm_gdrive_token', response.access_token);
         localStorage.setItem('agregllm_gdrive_expiry', expiry.toString());
 
-        if (this.pendingAuthPrompt === 'none') {
+        if (this.pendingAuthPrompt !== null) {
           this.pendingAuthPrompt = null;
           this.silentAuthResolver?.(true);
           this.silentAuthResolver = null;
         }
 
+        this.loginInProgress = false;
         window.dispatchEvent(new CustomEvent('agregllm-gdrive-auth-success'));
       },
     });
   }
 
-  login() {
-    if (this.tokenClient) {
+  async login(): Promise<boolean> {
+    if (this.loginInProgress) return false;
+    if (this.isAuthenticated()) return true;
+
+    await this.init();
+    if (!this.tokenClient) return false;
+
+    this.loginInProgress = true;
+
+    return new Promise((resolve) => {
+      this.pendingAuthPrompt = 'consent';
+      this.silentAuthResolver = (success) => {
+        this.loginInProgress = false;
+        resolve(success);
+      };
       this.tokenClient.requestAccessToken({ prompt: 'consent' });
-    }
-    else {
-      this.init().then(() => this.tokenClient?.requestAccessToken({ prompt: 'consent' }));
-    }
+    });
   }
 
   async trySilentAuth(): Promise<boolean> {
